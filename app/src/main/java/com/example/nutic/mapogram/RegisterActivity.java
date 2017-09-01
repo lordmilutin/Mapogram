@@ -17,13 +17,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class RegisterActivity extends AppCompatActivity {
 
-//  private String url = "http://192.168.1.6:3000/test";
-  private String url = "http://mapogram.dejan7.com/api/users/dejan";
+  private String url = "http://mapogram.dejan7.com/api/register";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -72,33 +75,61 @@ public class RegisterActivity extends AppCompatActivity {
       "}";
 
 
-    // Instantiate the RequestQueue.
-    RequestQueue queue = Volley.newRequestQueue(this);
+    EditText usernameTf   = (EditText) findViewById(R.id.usernameTf);
+    EditText firstNameTf  = (EditText) findViewById(R.id.firstNameTf);
+    EditText lastNameTf   = (EditText) findViewById(R.id.lastNameTf);
+    EditText emailTf      = (EditText) findViewById(R.id.emailTf);
+    EditText phoneTf      = (EditText) findViewById(R.id.phoneNumberTf);
+    EditText passwordTf   = (EditText) findViewById(R.id.passwordTf);
+    EditText passwordConfTf = (EditText) findViewById(R.id.passwordConfTf);
 
-    // Request a string response from the provided URL.
-    JsonObjectRequest jsObjRequest = new JsonObjectRequest
-      (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+    if (usernameTf.getText().toString().trim().equals("")) {
+      Toast.makeText(getApplicationContext(), "Username is required!", Toast.LENGTH_LONG).show();
+    }
+    else if (passwordTf.getText().toString().trim().equals("")) {
+      Toast.makeText(getApplicationContext(), "Password is required!", Toast.LENGTH_LONG).show();
+    }
+    else {
+      Map<String, String> params = new HashMap();
 
-        @Override
-        public void onResponse(JSONObject response) {
-          System.out.println(response);
-          // Toast.makeText(getApplicationContext(), "Response is: " + response.substring(0, 500) , Toast.LENGTH_LONG).show();
-        }
-      }, new Response.ErrorListener() {
+      params.put("username",    usernameTf.getText().toString().trim());
+      params.put("email",       emailTf.getText().toString().trim());
+      params.put("first_name",  firstNameTf.getText().toString().trim());
+      params.put("last_name",   lastNameTf.getText().toString().trim());
+      params.put("phone",       phoneTf.getText().toString().trim());
+      params.put("password",    passwordTf.getText().toString().trim());
+      params.put("password_confirmation", passwordConfTf.getText().toString().trim());
 
-        @Override
-        public void onErrorResponse(VolleyError error) {
-          // TODO Auto-generated method stub
-          Toast.makeText(getApplicationContext(), "That didn't work!", Toast.LENGTH_LONG).show();
-        }
-      });
+      // Instantiate the RequestQueue.
+      RequestQueue queue = Volley.newRequestQueue(this);
 
-    // Add the request to the RequestQueue.
-    queue.add(jsObjRequest);
+      // Request a string response from the provided URL.
+      JsonObjectRequest jsObjRequest = new JsonObjectRequest
+        (Request.Method.POST, url, new JSONObject(params), new Response.Listener<JSONObject>() {
 
+          @Override
+          public void onResponse(JSONObject response) {
+            Toast.makeText(getApplicationContext(), "Account created, please login now", Toast.LENGTH_LONG).show();
+            Intent myIntent = new Intent(RegisterActivity.this, LoginActivity.class);
+            RegisterActivity.this.startActivity(myIntent);
+          }
+        }, new Response.ErrorListener() {
 
-    Toast.makeText(getApplicationContext(), "Submiting form!", Toast.LENGTH_LONG).show();
+          @Override
+          public void onErrorResponse(VolleyError error) {
+            String message = "";
+            try {
+              JSONObject errResponse = new JSONObject(new String(error.networkResponse.data));
+              message = errResponse.getString("error");
+            } catch (JSONException e) {
+              e.printStackTrace();
+            }
+            Toast.makeText(getApplicationContext(), "Error: " + message, Toast.LENGTH_LONG).show();
+          }
+        });
 
-
+      // Add the request to the RequestQueue.
+      queue.add(jsObjRequest);
+    }
   }
 }

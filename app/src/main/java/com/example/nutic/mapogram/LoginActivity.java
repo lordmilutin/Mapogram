@@ -1,6 +1,7 @@
 package com.example.nutic.mapogram;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -24,11 +25,23 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
   private String url = "http://mapogram.dejan7.com/api/login";
+  public static final String PREFS_NAME = "MapogramPrefs";
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
+
+
+    // Restore preferences
+    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+    String jwtToken = settings.getString("token", null);
+
+    if (jwtToken != null) {
+      Toast.makeText(getApplicationContext(), "Token already set: " + jwtToken, Toast.LENGTH_LONG).show();
+    }
+
 
     // Handle register button
     final Button registerButton = (Button) findViewById(R.id.registerBtn);
@@ -72,6 +85,14 @@ public class LoginActivity extends AppCompatActivity {
             } catch (JSONException e) {
               e.printStackTrace();
             }
+
+            // Save token in preferences for long login
+            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("token", token);
+            // Commit the edits!
+            editor.apply();
+
             Toast.makeText(getApplicationContext(), "Token:  " + token, Toast.LENGTH_LONG).show();
           }
         }, new Response.ErrorListener() {

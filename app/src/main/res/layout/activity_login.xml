@@ -6,69 +6,62 @@
   android:layout_height="match_parent"
   tools:context="com.example.nutic.mapogram.LoginActivity">
 
-  <RelativeLayout
-    android:layout_width="0dp"
-    android:layout_height="500dp"
-    tools:layout_editor_absoluteY="20dp"
-    android:layout_marginRight="10dp"
-    app:layout_constraintRight_toRightOf="parent">
-
-    <EditText
-      android:id="@+id/usernameTf"
-      android:layout_width="wrap_content"
+    <LinearLayout
+      android:layout_gravity="center"
+      android:layout_width="300dp"
       android:layout_height="wrap_content"
-      android:layout_alignEnd="@+id/registerBtn"
-      android:layout_alignLeft="@+id/loginBtn"
-      android:layout_alignParentTop="true"
-      android:layout_alignRight="@+id/registerBtn"
-      android:layout_alignStart="@+id/loginBtn"
-      android:layout_marginTop="125dp"
-      android:ems="10"
-      android:hint="Username"
-      android:inputType="textPersonName" />
+      android:orientation="vertical"
+      tools:layout_editor_absoluteY="100dp"
+      tools:layout_editor_absoluteX="60dp">
 
-    <EditText
-      android:id="@+id/passwordTf"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignEnd="@+id/registerBtn"
-      android:layout_alignLeft="@+id/usernameTf"
-      android:layout_alignRight="@+id/registerBtn"
-      android:layout_alignStart="@+id/usernameTf"
-      android:layout_below="@+id/usernameTf"
-      android:layout_marginTop="26dp"
-      android:ems="10"
-      android:hint="Password"
-      android:inputType="textPassword" />
+      <EditText
+        android:id="@+id/usernameTf"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:layout_weight="3"
+        android:ems="10"
+        android:hint="Username"
+        android:inputType="textPersonName"
+        tools:layout_editor_absoluteX="79dp"
+        tools:layout_editor_absoluteY="97dp" />
 
-    <Button
-      android:id="@+id/registerBtn"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignBaseline="@+id/loginBtn"
-      android:layout_alignBottom="@+id/loginBtn"
-      android:layout_alignParentEnd="true"
-      android:layout_alignParentRight="true"
-      android:layout_marginEnd="47dp"
-      android:layout_marginRight="47dp"
-      android:text="Register"
-      tools:layout_editor_absoluteX="196dp"
-      tools:layout_editor_absoluteY="282dp" />
+      <EditText
+        android:id="@+id/passwordTf"
+        android:layout_width="match_parent"
+        android:layout_height="47dp"
+        android:layout_marginTop="30dp"
+        android:layout_weight="3"
+        android:ems="10"
+        android:hint="Password"
+        android:inputType="textPassword"
+        tools:layout_editor_absoluteX="77dp"
+        tools:layout_editor_absoluteY="196dp" />
 
-    <Button
-      android:id="@+id/loginBtn"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignParentLeft="true"
-      android:layout_alignParentStart="true"
-      android:layout_alignTop="@+id/passwordTf"
-      android:layout_marginLeft="43dp"
-      android:layout_marginStart="43dp"
-      android:layout_marginTop="75dp"
-      android:text="Login"
-      android:onClick="submitForm"
-      tools:layout_editor_absoluteX="69dp"
-      tools:layout_editor_absoluteY="282dp" />
-  </RelativeLayout>
+      <LinearLayout
+        android:layout_marginTop="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:orientation="horizontal">
+
+        <Button
+          android:id="@+id/loginBtn"
+          android:layout_width="150dp"
+          android:layout_height="50dp"
+          android:layout_weight="1"
+          android:onClick="submitForm"
+          android:text="Login" />
+
+        <Button
+          android:id="@+id/registerBtn"
+          android:layout_weight="1"
+          android:layout_width="150dp"
+          android:layout_height="50dp"
+          android:text="Register" />
+
+      </LinearLayout>
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
