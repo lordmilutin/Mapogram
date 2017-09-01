@@ -10,9 +10,6 @@
     android:supportsRtl="true"
     android:theme="@style/AppTheme">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <activity android:name=".LoginActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -21,7 +18,12 @@
       </intent-filter>
     </activity>
 
-    <activity android:name=".RegisterActivity"></activity>
+    <activity android:name=".RegisterActivity">
+    </activity>
   </application>
+
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

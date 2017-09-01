@@ -7,60 +7,74 @@
   tools:context="com.example.nutic.mapogram.RegisterActivity">
 
   <RelativeLayout
-    android:layout_width="371dp"
-    android:layout_height="508dp"
+    android:layout_width="378dp"
+    android:layout_height="560dp"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintHorizontal_bias="1.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintVertical_bias="1.0"
-    tools:layout_editor_absoluteY="3dp"
-    tools:layout_editor_absoluteX="13dp">
+    android:layout_marginTop="16dp"
+    android:layout_marginLeft="16dp">
+
+    <EditText
+      android:id="@+id/usernameTf"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:ems="10"
+      android:hint="Username"
+      android:inputType="textPersonName"
+      android:layout_marginTop="26dp"
+      android:layout_alignParentTop="true"
+      android:layout_alignLeft="@+id/firstNameTf"
+      android:layout_alignStart="@+id/firstNameTf"
+      android:layout_alignRight="@+id/firstNameTf"
+      android:layout_alignEnd="@+id/firstNameTf" />
 
     <EditText
       android:id="@+id/firstNameTf"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="10dp"
+      android:layout_marginTop="23dp"
       android:ems="10"
+      android:hint="First name"
       android:inputType="textPersonName"
-      android:text="First name"
-      android:layout_alignParentTop="true"
+      android:layout_below="@+id/usernameTf"
       android:layout_alignLeft="@+id/lastNameTf"
       android:layout_alignStart="@+id/lastNameTf"
-      android:layout_alignRight="@+id/backToLoginBtn"
-      android:layout_alignEnd="@+id/backToLoginBtn" />
+      android:layout_alignRight="@+id/lastNameTf"
+      android:layout_alignEnd="@+id/lastNameTf" />
 
     <EditText
       android:id="@+id/lastNameTf"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="20dp"
-      android:ems="10"
-      android:inputType="textPersonName"
-      android:text="Last name"
-      android:layout_below="@+id/firstNameTf"
+      android:layout_alignEnd="@+id/backToLoginBtn"
       android:layout_alignLeft="@+id/submitBtn"
+      android:layout_alignRight="@+id/backToLoginBtn"
       android:layout_alignStart="@+id/submitBtn"
+      android:layout_below="@+id/firstNameTf"
       android:layout_marginLeft="13dp"
       android:layout_marginStart="13dp"
-      android:layout_alignRight="@+id/backToLoginBtn"
-      android:layout_alignEnd="@+id/backToLoginBtn" />
+      android:layout_marginTop="20dp"
+      android:ems="10"
+      android:hint="Last name"
+      android:inputType="textPersonName" />
 
     <EditText
       android:id="@+id/emailTf"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_alignEnd="@+id/lastNameTf"
+      android:layout_alignLeft="@+id/lastNameTf"
+      android:layout_alignRight="@+id/lastNameTf"
+      android:layout_alignStart="@+id/lastNameTf"
+      android:layout_below="@+id/lastNameTf"
       android:layout_marginTop="18dp"
       android:ems="10"
-      android:inputType="textEmailAddress"
-      android:text="Email"
-      android:layout_below="@+id/lastNameTf"
-      android:layout_alignLeft="@+id/lastNameTf"
-      android:layout_alignStart="@+id/lastNameTf"
-      android:layout_alignRight="@+id/lastNameTf"
-      android:layout_alignEnd="@+id/lastNameTf" />
+      android:hint="Email"
+      android:inputType="textEmailAddress" />
 
     <Button
       android:id="@+id/backToLoginBtn"
@@ -95,6 +109,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="15dp"
       android:text="Create account"
+      android:onClick="submitForm"
       android:layout_marginLeft="28dp"
       android:layout_marginStart="28dp"
       android:layout_alignParentBottom="true"
@@ -119,28 +134,27 @@
       android:id="@+id/phoneNumberTf"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:ems="10"
-      android:inputType="number"
-      android:text="Phone"
-      android:layout_marginTop="23dp"
-      android:layout_below="@+id/emailTf"
+      android:layout_alignEnd="@+id/emailTf"
       android:layout_alignLeft="@+id/emailTf"
-      android:layout_alignStart="@+id/emailTf"
       android:layout_alignRight="@+id/emailTf"
-      android:layout_alignEnd="@+id/emailTf" />
+      android:layout_alignStart="@+id/emailTf"
+      android:layout_below="@+id/emailTf"
+      android:layout_marginTop="23dp"
+      android:ems="10"
+      android:hint="Phone"
+      android:inputType="number" />
 
     <Button
       android:id="@+id/uploadPhotoBtn"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:text="Take photo"
+      android:layout_above="@+id/submitBtn"
       android:layout_alignLeft="@+id/passwordConfTf"
       android:layout_alignStart="@+id/passwordConfTf"
-      android:layout_below="@+id/passwordConfTf"
-      android:layout_marginTop="12dp"
-      android:layout_toStartOf="@+id/backToLoginBtn"
-      android:text="Take photo"
-      android:layout_alignRight="@+id/submitBtn"
-      android:layout_alignEnd="@+id/submitBtn" />
+      android:layout_marginLeft="7dp"
+      android:layout_marginStart="7dp"
+      android:layout_marginBottom="7dp" />
 
     <ImageView
       android:id="@+id/photoView"

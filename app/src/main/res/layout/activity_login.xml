@@ -14,32 +14,32 @@
     app:layout_constraintRight_toRightOf="parent">
 
     <EditText
-      android:id="@+id/editText"
+      android:id="@+id/usernameTf"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_alignEnd="@+id/registerBtn"
+      android:layout_alignLeft="@+id/loginBtn"
+      android:layout_alignParentTop="true"
+      android:layout_alignRight="@+id/registerBtn"
+      android:layout_alignStart="@+id/loginBtn"
       android:layout_marginTop="125dp"
       android:ems="10"
-      android:inputType="textPersonName"
-      android:text="Username"
-      android:layout_alignParentTop="true"
-      android:layout_alignLeft="@+id/loginBtn"
-      android:layout_alignStart="@+id/loginBtn"
-      android:layout_alignRight="@+id/registerBtn"
-      android:layout_alignEnd="@+id/registerBtn" />
+      android:hint="Username"
+      android:inputType="textPersonName" />
 
     <EditText
-      android:id="@+id/editText2"
+      android:id="@+id/passwordTf"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:ems="10"
-      android:inputType="textPassword"
-      android:text="Password"
-      android:layout_marginTop="26dp"
-      android:layout_below="@+id/editText"
-      android:layout_alignLeft="@+id/editText"
-      android:layout_alignStart="@+id/editText"
+      android:layout_alignEnd="@+id/registerBtn"
+      android:layout_alignLeft="@+id/usernameTf"
       android:layout_alignRight="@+id/registerBtn"
-      android:layout_alignEnd="@+id/registerBtn" />
+      android:layout_alignStart="@+id/usernameTf"
+      android:layout_below="@+id/usernameTf"
+      android:layout_marginTop="26dp"
+      android:ems="10"
+      android:hint="Password"
+      android:inputType="textPassword" />
 
     <Button
       android:id="@+id/registerBtn"
@@ -61,11 +61,12 @@
       android:layout_height="wrap_content"
       android:layout_alignParentLeft="true"
       android:layout_alignParentStart="true"
-      android:layout_alignTop="@+id/editText2"
+      android:layout_alignTop="@+id/passwordTf"
       android:layout_marginLeft="43dp"
       android:layout_marginStart="43dp"
       android:layout_marginTop="75dp"
       android:text="Login"
+      android:onClick="submitForm"
       tools:layout_editor_absoluteX="69dp"
       tools:layout_editor_absoluteY="282dp" />
   </RelativeLayout>
