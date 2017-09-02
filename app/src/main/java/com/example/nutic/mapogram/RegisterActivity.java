@@ -64,17 +64,6 @@ public class RegisterActivity extends AppCompatActivity {
 
   public void submitForm(View v) {
 
-    String jsonData = "{" +
-      "username:\"" + ((EditText) findViewById(R.id.usernameTf)).getText() + "\"," +
-      "first_name:\"" + ((EditText) findViewById(R.id.firstNameTf)).getText() + "\"," +
-      "last_name:\"" + ((EditText) findViewById(R.id.lastNameTf)).getText() + "\"," +
-      "email:\"" + ((EditText) findViewById(R.id.emailTf)).getText() + "\"," +
-      "phone:\"" + ((EditText) findViewById(R.id.phoneNumberTf)).getText() + "\"," +
-      "password:\"" + ((EditText) findViewById(R.id.passwordTf)).getText() + "\"," +
-      "password_confirmation:\"" + ((EditText) findViewById(R.id.passwordConfTf)).getText() + "\"" +
-      "}";
-
-
     EditText usernameTf   = (EditText) findViewById(R.id.usernameTf);
     EditText firstNameTf  = (EditText) findViewById(R.id.firstNameTf);
     EditText lastNameTf   = (EditText) findViewById(R.id.lastNameTf);
