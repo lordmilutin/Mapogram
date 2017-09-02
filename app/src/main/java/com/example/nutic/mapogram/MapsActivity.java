@@ -1,170 +1,230 @@
 package com.example.nutic.mapogram;
 
-import android.Manifest;
-import android.content.Context;
+import android.Manifest.permission;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
-
-import com.android.volley.Request;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-
-import org.json.JSONException;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONObject;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+    ConnectionCallbacks, OnConnectionFailedListener, OnMarkerClickListener, LocationListener {
 
-  private static final float DEFAULT_ZOOM = 9;
+  public static final String PREFS_NAME = "MapogramPrefs";
+  private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+  private static final float DEFAULT_ZOOM = 12;
+
   private GoogleMap mMap;
+  private GoogleApiClient mGoogleApiClient;
+  private Marker mCurrentMarker;
+  private Location mLastLocation;
+  private LocationRequest mLocationRequest;
+
   private String url = "http://mapogram.dejan7.com/api/photos/{location}/{distance}";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_maps);
-    // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-      .findFragmentById(R.id.map);
+        .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
+
+    if (mGoogleApiClient == null) {
+      mGoogleApiClient = new GoogleApiClient.Builder(this)
+          .addConnectionCallbacks(this)
+          .addOnConnectionFailedListener(this)
+          .addApi(LocationServices.API)
+          .build();
+    }
   }
 
-  /**
-   * Manipulates the map once available.
-   * This callback is triggered when the map is ready to be used.
-   * This is where we can add markers or lines, add listeners or move the camera
-   */
+  @Override
+  protected void onStart() {
+    super.onStart();
+    mGoogleApiClient.connect();
+  }
+
+  @Override
+  protected void onStop() {
+    super.onStop();
+    if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+      mGoogleApiClient.disconnect();
+    }
+  }
+
   @Override
   public void onMapReady(GoogleMap googleMap) {
-    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-      // Ask for permission
-      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 2);
-      return;
+    mMap = googleMap;
+    mMap.getUiSettings().setZoomControlsEnabled(true);
+    mMap.setOnMarkerClickListener(this);
+
+    setUpMap();
+  }
+
+  private void setUpMap() {
+    if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION)
+        != PackageManager.PERMISSION_GRANTED
+        && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
+        != PackageManager.PERMISSION_GRANTED) {
+
+      ActivityCompat.requestPermissions(this,
+          new String[]{permission.ACCESS_FINE_LOCATION},
+          LOCATION_PERMISSION_REQUEST_CODE);
     } else {
-      proceedWithPermission(googleMap);
+      initMap();
+    }
+  }
+
+  private void initMap() {
+    if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION)
+        != PackageManager.PERMISSION_GRANTED
+        && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
+        != PackageManager.PERMISSION_GRANTED) {
+      return;
+    }
+    mMap.setMyLocationEnabled(true);
+    mMap.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM));
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    switch (requestCode) {
+      case LOCATION_PERMISSION_REQUEST_CODE: {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+          initMap();
+        } else {
+          return;
+        }
+        break;
+      }
     }
   }
 
   @Override
-  public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-    switch (requestCode) {
-      case 2: {
-        // If request is cancelled, the result arrays are empty.
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-          // permission was granted, yay!
-        } else {
-          // permission denied, boo! Disable the
-          // functionality that depends on this permission.
-          Toast.makeText(getApplicationContext(), "Too bad, we must have permission to proceed!", Toast.LENGTH_LONG).show();
-        }
-        return;
-      }
+  public void onConnected(@Nullable Bundle bundle) {
+    mLocationRequest = new LocationRequest();
+    mLocationRequest.setInterval(1000);
+    mLocationRequest.setFastestInterval(1000);
+    mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    if (ContextCompat.checkSelfPermission(this,
+        permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-      // other 'case' lines to check for other
-      // permissions this app might request
+      LocationServices.FusedLocationApi
+          .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
   }
 
-  private void proceedWithPermission(GoogleMap mMap) {
-    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-      return;
-    }
+  @Override
+  public void onConnectionSuspended(int i) {
 
-    mMap.setMyLocationEnabled(true);
-
-    LocationManager mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-
-    Location location = mLocationManager.getLastKnownLocation("");
-
-    getDeviceLocation(mMap);
-
-//    System.out.println(location.getLatitude());
-//    System.out.println(location.getLongitude());
-
-    // Add a marker in Sydney and move the camera
-    LatLng sydney = new LatLng(-34, 151);
-    mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-
-    mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
   }
 
-  private void getDeviceLocation(final GoogleMap mMap) {
-    /*
-     * Get the best and most recent location of the device, which may be null in rare
-     * cases when a location is not available.
-     */
-    try {
-      // Construct a FusedLocationProviderClient.
-      FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+  @Override
+  public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-      // Construct a FusedLocationProviderClient.
-      mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-      Task locationResult = mFusedLocationProviderClient.getLastLocation();
-      locationResult.addOnCompleteListener(this, new OnCompleteListener() {
-
-        @Override
-        public void onComplete(@NonNull Task task) {
-
-          LatLng mDefaultLocation = new LatLng(43.321379, 21.895784);   // Nis Centar
-
-          if (task.isSuccessful()) {
-            // Set the map's camera position to the current location of the device.
-
-            Location mLastKnownLocation = (Location) task.getResult();
-            System.out.println(mLastKnownLocation);
-
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-          } else {
-            Log.d("ZZ", "Current location is null. Using defaults.");
-            Log.e("ZZ", "Exception: %s", task.getException());
-
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-          }
-        }
-      });
-    } catch (SecurityException e) {
-      Log.e("Exception: %s", e.getMessage());
-    }
   }
 
-  private void addMarkers(GoogleMap mMap) {
+  @Override
+  public boolean onMarkerClick(Marker marker) {
+    return false;
+  }
+
+  @Override
+  public void onLocationChanged(Location location) {
+    mLastLocation = location;
+    updateCurrentLocation(location);
+  }
+
+  private void updateCurrentLocation(Location location) {
+    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+    if (mCurrentMarker != null) {
+      mCurrentMarker.remove();
+    }
+
+    MarkerOptions markerOptions = new MarkerOptions();
+    markerOptions.position(latLng);
+    markerOptions.title("Current Position");
+    mCurrentMarker = mMap.addMarker(markerOptions);
+    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+
+    getUsers(location);
+  }
+
+  private void getUsers(final Location location){
     RequestQueue queue = Volley.newRequestQueue(this);
     // Request a string response from the provided URL.
-    JsonObjectRequest jsObjRequest = new JsonObjectRequest
-      (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+    String apiUrl = "http://mapogram.dejan7.com/api/location/exchange";
 
-        @Override
-        public void onResponse(JSONObject response) {
-          Toast.makeText(getApplicationContext(), "Response: " + response.toString(), Toast.LENGTH_LONG).show();
-        }
-      }, new Response.ErrorListener() {
+    HashMap<String, String> params = new HashMap<>();
+    params.put("location", String.valueOf(location.getLongitude()) + ", " + String.valueOf(location.getLatitude()));
 
-        @Override
-        public void onErrorResponse(VolleyError error) {
-          Toast.makeText(getApplicationContext(), "Error occured", Toast.LENGTH_LONG).show();
-        }
-      });
+    final JsonObjectRequest jsObjRequest = new JsonObjectRequest
+        (Method.POST, apiUrl, new JSONObject(params), new Response.Listener<JSONObject>() {
+
+          @Override
+          public void onResponse(JSONObject response) {
+            Toast.makeText(getApplicationContext(), "Response: " + response.toString(),
+                Toast.LENGTH_LONG).show();
+          }
+        }, new Response.ErrorListener() {
+
+          @Override
+          public void onErrorResponse(VolleyError error) {
+            error.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Error occured", Toast.LENGTH_LONG).show();
+          }
+        }) {
+      @Override
+      public Map<String, String> getHeaders() throws AuthFailureError {
+        HashMap<String, String> header = new HashMap<>();
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        header.put("Authorization", settings.getString("token", null));
+        return header;
+      }
+    };
 
     // Add the request to the RequestQueue.
     queue.add(jsObjRequest);

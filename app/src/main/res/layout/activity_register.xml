@@ -1,170 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:orientation="vertical"
   tools:context="com.example.nutic.mapogram.RegisterActivity">
 
-  <RelativeLayout
-    android:layout_width="378dp"
-    android:layout_height="560dp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintHorizontal_bias="1.0"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintVertical_bias="1.0"
-    android:layout_marginTop="16dp"
-    android:layout_marginLeft="16dp">
+  <android.support.v4.widget.NestedScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <EditText
-      android:id="@+id/usernameTf"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:ems="10"
-      android:hint="Username"
-      android:inputType="textPersonName"
-      android:layout_marginTop="26dp"
-      android:layout_alignParentTop="true"
-      android:layout_alignLeft="@+id/firstNameTf"
-      android:layout_alignStart="@+id/firstNameTf"
-      android:layout_alignRight="@+id/firstNameTf"
-      android:layout_alignEnd="@+id/firstNameTf" />
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:gravity="center"
+      android:orientation="vertical">
 
-    <EditText
-      android:id="@+id/firstNameTf"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="23dp"
-      android:ems="10"
-      android:hint="First name"
-      android:inputType="textPersonName"
-      android:layout_below="@+id/usernameTf"
-      android:layout_alignLeft="@+id/lastNameTf"
-      android:layout_alignStart="@+id/lastNameTf"
-      android:layout_alignRight="@+id/lastNameTf"
-      android:layout_alignEnd="@+id/lastNameTf" />
+      <EditText
+        android:id="@+id/usernameTf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="26dp"
+        android:ems="10"
+        android:hint="Username"
+        android:inputType="textPersonName" />
 
-    <EditText
-      android:id="@+id/lastNameTf"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignEnd="@+id/backToLoginBtn"
-      android:layout_alignLeft="@+id/submitBtn"
-      android:layout_alignRight="@+id/backToLoginBtn"
-      android:layout_alignStart="@+id/submitBtn"
-      android:layout_below="@+id/firstNameTf"
-      android:layout_marginLeft="13dp"
-      android:layout_marginStart="13dp"
-      android:layout_marginTop="20dp"
-      android:ems="10"
-      android:hint="Last name"
-      android:inputType="textPersonName" />
+      <EditText
+        android:id="@+id/firstNameTf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="23dp"
+        android:ems="10"
+        android:hint="First name"
+        android:inputType="textPersonName" />
 
-    <EditText
-      android:id="@+id/emailTf"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignEnd="@+id/lastNameTf"
-      android:layout_alignLeft="@+id/lastNameTf"
-      android:layout_alignRight="@+id/lastNameTf"
-      android:layout_alignStart="@+id/lastNameTf"
-      android:layout_below="@+id/lastNameTf"
-      android:layout_marginTop="18dp"
-      android:ems="10"
-      android:hint="Email"
-      android:inputType="textEmailAddress" />
+      <EditText
+        android:id="@+id/lastNameTf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="23dp"
+        android:ems="10"
+        android:hint="Last name"
+        android:inputType="textPersonName" />
 
-    <Button
-      android:id="@+id/backToLoginBtn"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignBaseline="@+id/submitBtn"
-      android:layout_alignBottom="@+id/submitBtn"
-      android:layout_alignParentEnd="true"
-      android:layout_alignParentRight="true"
-      android:layout_marginEnd="29dp"
-      android:layout_marginRight="29dp"
-      android:text="Back to Login" />
+      <EditText
+        android:id="@+id/emailTf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:ems="10"
+        android:hint="Email"
+        android:inputType="textEmailAddress" />
 
+      <EditText
+        android:id="@+id/passwordTf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:ems="10"
+        android:hint="Password"
+        android:inputType="textPassword" />
 
-    <EditText
-      android:id="@+id/passwordTf"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:ems="10"
-      android:hint="Password"
-      android:inputType="textPassword"
-      android:layout_marginTop="25dp"
-      android:layout_below="@+id/phoneNumberTf"
-      android:layout_alignLeft="@+id/phoneNumberTf"
-      android:layout_alignStart="@+id/phoneNumberTf"
-      android:layout_alignRight="@+id/phoneNumberTf"
-      android:layout_alignEnd="@+id/phoneNumberTf" />
+      <EditText
+        android:id="@+id/passwordConfTf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:ems="10"
+        android:hint="Confirm password"
+        android:inputType="textPassword" />
 
-    <Button
-      android:id="@+id/submitBtn"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="15dp"
-      android:text="Create account"
-      android:onClick="submitForm"
-      android:layout_marginLeft="28dp"
-      android:layout_marginStart="28dp"
-      android:layout_alignParentBottom="true"
-      android:layout_alignParentLeft="true"
-      android:layout_alignParentStart="true" />
+      <EditText
+        android:id="@+id/phoneNumberTf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="23dp"
+        android:ems="10"
+        android:hint="Phone"
+        android:inputType="number" />
 
-    <EditText
-      android:id="@+id/passwordConfTf"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:ems="10"
-      android:hint="Confirm password"
-      android:inputType="textPassword"
-      android:layout_below="@+id/passwordTf"
-      android:layout_alignLeft="@+id/passwordTf"
-      android:layout_alignStart="@+id/passwordTf"
-      android:layout_marginTop="14dp"
-      android:layout_alignRight="@+id/passwordTf"
-      android:layout_alignEnd="@+id/passwordTf" />
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-    <EditText
-      android:id="@+id/phoneNumberTf"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignEnd="@+id/emailTf"
-      android:layout_alignLeft="@+id/emailTf"
-      android:layout_alignRight="@+id/emailTf"
-      android:layout_alignStart="@+id/emailTf"
-      android:layout_below="@+id/emailTf"
-      android:layout_marginTop="23dp"
-      android:ems="10"
-      android:hint="Phone"
-      android:inputType="number" />
+        <Button
+          android:id="@+id/uploadPhotoBtn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="7dp"
+          android:layout_marginStart="7dp"
+          android:layout_marginLeft="7dp"
+          android:text="Take photo" />
 
-    <Button
-      android:id="@+id/uploadPhotoBtn"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Take photo"
-      android:layout_above="@+id/submitBtn"
-      android:layout_alignLeft="@+id/passwordConfTf"
-      android:layout_alignStart="@+id/passwordConfTf"
-      android:layout_marginLeft="7dp"
-      android:layout_marginStart="7dp"
-      android:layout_marginBottom="7dp" />
+        <ImageView
+          android:id="@+id/photoView"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="28dp"
+          android:layout_marginLeft="28dp"
+          app:srcCompat="@mipmap/ic_launcher" />
+      </LinearLayout>
 
-    <ImageView
-      android:id="@+id/photoView"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignBottom="@+id/uploadPhotoBtn"
-      android:layout_alignLeft="@+id/backToLoginBtn"
-      android:layout_alignStart="@+id/backToLoginBtn"
-      app:srcCompat="@mipmap/ic_launcher" />
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-  </RelativeLayout>
+        <Button
+          android:id="@+id/submitBtn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="7dp"
+          android:layout_marginLeft="7dp"
+          android:onClick="submitForm"
+          android:text="Create account" />
 
-</android.support.constraint.ConstraintLayout>
+        <Button
+          android:id="@+id/backToLoginBtn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="28dp"
+          android:layout_marginLeft="28dp"
+          android:text="Back to Login" />
+
+      </LinearLayout>
+
+    </LinearLayout>
+
+  </android.support.v4.widget.NestedScrollView>
+
+</LinearLayout>
