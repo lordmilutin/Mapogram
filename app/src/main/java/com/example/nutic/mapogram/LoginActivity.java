@@ -14,6 +14,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -33,15 +34,12 @@ public class LoginActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
 
-
     // Restore preferences
     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
     String jwtToken = settings.getString("token", null);
 
     if (jwtToken != null) {
-     // Toast.makeText(getApplicationContext(), "Token already set: " + jwtToken, Toast.LENGTH_LONG).show();
-      Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, MapsActivity.class);
-      LoginActivity.this.startActivity(alreadyLoggedInIntent);
+      redirectAfterLogin();
     }
 
 
@@ -72,6 +70,7 @@ public class LoginActivity extends AppCompatActivity {
       params.put("username", usernameTf.getText().toString().trim());
       params.put("password", passwordTf.getText().toString().trim());
 
+      final String username = usernameTf.getText().toString().trim();
       // Instantiate the RequestQueue.
       RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -92,10 +91,11 @@ public class LoginActivity extends AppCompatActivity {
             SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString("token", token);
+            editor.putString("username", username);
             // Commit the edits!
             editor.apply();
 
-            Toast.makeText(getApplicationContext(), "Token:  " + token, Toast.LENGTH_LONG).show();
+            redirectAfterLogin();
           }
         }, new Response.ErrorListener() {
 
@@ -115,5 +115,18 @@ public class LoginActivity extends AppCompatActivity {
       // Add the request to the RequestQueue.
       queue.add(jsObjRequest);
     }
+  }
+
+  private void redirectAfterLogin() {
+
+    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+    String username = settings.getString("username", null);
+
+    //Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, MapsActivity.class);
+
+    Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, ProfileActivity.class);
+    alreadyLoggedInIntent.putExtra("username", username);
+
+    LoginActivity.this.startActivity(alreadyLoggedInIntent);
   }
 }
