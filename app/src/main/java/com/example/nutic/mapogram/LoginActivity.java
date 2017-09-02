@@ -39,7 +39,9 @@ public class LoginActivity extends AppCompatActivity {
     String jwtToken = settings.getString("token", null);
 
     if (jwtToken != null) {
-      Toast.makeText(getApplicationContext(), "Token already set: " + jwtToken, Toast.LENGTH_LONG).show();
+     // Toast.makeText(getApplicationContext(), "Token already set: " + jwtToken, Toast.LENGTH_LONG).show();
+      Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, MapsActivity.class);
+      LoginActivity.this.startActivity(alreadyLoggedInIntent);
     }
 
 

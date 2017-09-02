@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
@@ -7,12 +7,10 @@
   tools:context="com.example.nutic.mapogram.LoginActivity">
 
     <LinearLayout
-      android:layout_gravity="center"
-      android:layout_width="300dp"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:orientation="vertical"
-      tools:layout_editor_absoluteY="100dp"
-      tools:layout_editor_absoluteX="60dp">
+      android:layout_margin="24dp"
+      android:orientation="vertical">
 
       <EditText
         android:id="@+id/usernameTf"
@@ -64,4 +62,4 @@
 
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>
