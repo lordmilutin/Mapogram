@@ -6,10 +6,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,20 +37,27 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PhotoActivity extends AppCompatActivity {
+public class PhotoActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
   private String url = "http://mapogram.dejan7.com/api/photos/";
   private int likes = 0;
   private String id; //photoID
   private String photoLngLatString = "";
   public static final String PREFS_NAME = "MapogramPrefs";
+  Double latitude;
+  Double longitude;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_photo);
 
+    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+    navigationView.setNavigationItemSelectedListener(this);
 
+    Intent intent = getIntent();
+    latitude = intent.getDoubleExtra("latitude", 43.321349);
+    longitude = intent.getDoubleExtra("longitude", 21.895758);
     /**
      * COMMENT CLICK
      */
@@ -216,7 +226,8 @@ public class PhotoActivity extends AppCompatActivity {
       public Map<String, String> getHeaders() throws AuthFailureError {
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("Accept", "application/json");
-        headers.put("Authorization", "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj");
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        headers.put("Authorization", "Bearer " + settings.getString("token", null));
         return headers;
       }
     };
@@ -227,6 +238,41 @@ public class PhotoActivity extends AppCompatActivity {
 
   private void myRecreate() {
     this.recreate();
+  }
+
+  @Override
+  public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    int id = item.getItemId();
+
+    switch (id) {
+      case R.id.nav_add_friend: {
+        Intent intent = new Intent(PhotoActivity.this, MapsActivity.class);
+        PhotoActivity.this.startActivity(intent);
+        return true;
+      }
+      case R.id.nav_show_users: {
+        Intent alreadyLoggedInIntent = new Intent(PhotoActivity.this, MapsActivity.class);
+        PhotoActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      case R.id.nav_add_photo: {
+        Intent intent = new Intent(PhotoActivity.this, AddPhotoActivity.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        PhotoActivity.this.startActivity(intent);
+        return true;
+      }
+      case R.id.nav_top_list: {
+        Intent intent = new Intent(PhotoActivity.this, TopListActivity.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        PhotoActivity.this.startActivity(intent);
+        return true;
+      }
+      default: {
+        return false;
+      }
+    }
   }
 }
 

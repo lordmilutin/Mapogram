@@ -276,13 +276,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
       }
       case R.id.nav_add_photo: {
-        Intent alreadyLoggedInIntent = new Intent(MapsActivity.this, AddPhotoActivity.class);
-        MapsActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(MapsActivity.this, AddPhotoActivity.class);
+        intent.putExtra("latitude", mLastLocation.getLatitude());
+        intent.putExtra("longitude", mLastLocation.getLongitude());
+        MapsActivity.this.startActivity(intent);
         return true;
       }
       case R.id.nav_top_list: {
-        Intent alreadyLoggedInIntent = new Intent(MapsActivity.this, TopListActivity.class);
-        MapsActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(MapsActivity.this, TopListActivity.class);
+        intent.putExtra("latitude", mLastLocation.getLatitude());
+        intent.putExtra("longitude", mLastLocation.getLongitude());
+        MapsActivity.this.startActivity(intent);
         return true;
       }
       default: {
@@ -316,6 +320,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mBluetoothAdapter.startDiscovery();
       }
     }
+  }
+
+  private void addMarkers() {
+
   }
 }
 

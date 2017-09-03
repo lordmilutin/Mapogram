@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -32,11 +33,17 @@ public class AddPhotoActivity extends AppCompatActivity implements NavigationVie
 
   private String url = "http://mapogram.dejan7.com/api/photos";
   public static final String PREFS_NAME = "MapogramPrefs";
+  Double latitude;
+  Double longitude;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_add_photo);
+
+    Intent intent = getIntent();
+    latitude = intent.getDoubleExtra("latitude", 43.321349);
+    longitude = intent.getDoubleExtra("longitude", 21.895758);
 
     NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
     navigationView.setNavigationItemSelectedListener(this);
@@ -78,8 +85,8 @@ public class AddPhotoActivity extends AppCompatActivity implements NavigationVie
     params.put("description",    description.getText().toString().trim());
     params.put("categories",    hashtags.getText().toString().trim());
     params.put("img", "data:image/jpeg;base64," + base64);
-    params.put("lng", "43.899593");
-    params.put("lat", "21.899593");
+    params.put("lng", longitude.toString());
+    params.put("lat", latitude.toString());
 
     // Request a string response from the provided URL.
     JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -126,8 +133,8 @@ public class AddPhotoActivity extends AppCompatActivity implements NavigationVie
 
     switch (id) {
       case R.id.nav_add_friend: {
-        Intent alreadyLoggedInIntent = new Intent(AddPhotoActivity.this, MapsActivity.class);
-        AddPhotoActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(AddPhotoActivity.this, MapsActivity.class);
+        AddPhotoActivity.this.startActivity(intent);
         return true;
       }
       case R.id.nav_show_users: {
@@ -136,13 +143,17 @@ public class AddPhotoActivity extends AppCompatActivity implements NavigationVie
         return true;
       }
       case R.id.nav_add_photo: {
-        Intent alreadyLoggedInIntent = new Intent(AddPhotoActivity.this, AddPhotoActivity.class);
-        AddPhotoActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(AddPhotoActivity.this, AddPhotoActivity.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        AddPhotoActivity.this.startActivity(intent);
         return true;
       }
       case R.id.nav_top_list: {
-        Intent alreadyLoggedInIntent = new Intent(AddPhotoActivity.this, TopListActivity.class);
-        AddPhotoActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(AddPhotoActivity.this, TopListActivity.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        AddPhotoActivity.this.startActivity(intent);
         return true;
       }
       default: {
