@@ -44,7 +44,8 @@
       android:name=".MapsActivity"
       android:label="@string/title_activity_maps" />
     <activity android:name=".ProfileActivity" />
-    <activity android:name=".AddPhotoActivity"></activity>
+    <activity android:name=".AddPhotoActivity" />
+    <activity android:name=".TopListActivity"></activity>
   </application>
 
 </manifest>

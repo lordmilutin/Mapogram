@@ -124,8 +124,9 @@ public class LoginActivity extends AppCompatActivity {
 
 //  Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, MapsActivity.class);
 //  Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, ProfileActivity.class);
+//  Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, AddPhotoActivity.class);
 
-    Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, AddPhotoActivity.class);
+    Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, TopListActivity.class);
 
     alreadyLoggedInIntent.putExtra("username", username);
 
