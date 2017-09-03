@@ -137,9 +137,13 @@ public class AddPhotoActivity extends AppCompatActivity implements NavigationVie
         AddPhotoActivity.this.startActivity(intent);
         return true;
       }
-      case R.id.nav_show_users: {
-        Intent alreadyLoggedInIntent = new Intent(AddPhotoActivity.this, MapsActivity.class);
-        AddPhotoActivity.this.startActivity(alreadyLoggedInIntent);
+      case R.id.myprofile: {
+        Intent intent = new Intent(AddPhotoActivity.this, ProfileActivity.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        intent.putExtra("username", settings.getString("username", null));
+        AddPhotoActivity.this.startActivity(intent);
         return true;
       }
       case R.id.nav_add_photo: {

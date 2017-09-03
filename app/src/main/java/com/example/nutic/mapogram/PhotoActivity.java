@@ -316,11 +316,21 @@ public class PhotoActivity extends AppCompatActivity implements NavigationView.O
         PhotoActivity.this.startActivity(intent);
         return true;
       }
-      case R.id.nav_show_users: {
+
+      /*case R.id.nav_show_users: {
         Intent alreadyLoggedInIntent = new Intent(PhotoActivity.this, MapsActivity.class);
         PhotoActivity.this.startActivity(alreadyLoggedInIntent);
         return true;
-      }
+      }*/
+        case R.id.myprofile: {
+            Intent intent = new Intent(PhotoActivity.this, ProfileActivity.class);
+            intent.putExtra("latitude", latitude);
+            intent.putExtra("longitude", longitude);
+            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+            intent.putExtra("username", settings.getString("username", null));
+            PhotoActivity.this.startActivity(intent);
+            return true;
+        }
       case R.id.nav_add_photo: {
         Intent intent = new Intent(PhotoActivity.this, AddPhotoActivity.class);
         intent.putExtra("latitude", latitude);

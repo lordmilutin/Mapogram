@@ -30,6 +30,7 @@ public class ProfileActivity extends AppCompatActivity {
 
   private String url = "http://mapogram.dejan7.com/api/users";
 
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -53,9 +54,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.textViewUsername)).setText(response.optString("username"));
         ((TextView) findViewById(R.id.textViewEmail)).setText(response.optString("email"));
-        ((TextView) findViewById(R.id.textViewFirstName)).setText(response.optString("first_name"));
-        ((TextView) findViewById(R.id.textViewLastName)).setText(response.optString("last_name"));
-        ((TextView) findViewById(R.id.textViewPhone)).setText(response.optString("phone_number"));
+        ((TextView) findViewById(R.id.textViewFirstName)).setText(response.optString("first_name") == "null" || response.optString("first_name") == null ? "" : response.optString("first_name"));
+        ((TextView) findViewById(R.id.textViewLastName)).setText(response.optString("last_name") == "null" || response.optString("last_name") == null ? "" : response.optString("last_name"));
+        ((TextView) findViewById(R.id.textViewPhone)).setText(response.optString("phone_number") == "null" || response.optString("phone_number") == null ? "" : response.optString("phone_number"));
 
         DownloadImageTask task = new DownloadImageTask((ImageView) findViewById(R.id.imageView));
 

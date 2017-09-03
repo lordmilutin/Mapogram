@@ -1,6 +1,7 @@
 package com.example.nutic.mapogram;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +30,7 @@ public class TopListActivity extends AppCompatActivity implements NavigationView
   private String url = "http://mapogram.dejan7.com/api/users/toplist";
   Double latitude;
   Double longitude;
+  public static final String PREFS_NAME = "MapogramPrefs";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -104,9 +106,18 @@ public class TopListActivity extends AppCompatActivity implements NavigationView
         TopListActivity.this.startActivity(alreadyLoggedInIntent);
         return true;
       }
-      case R.id.nav_show_users: {
+      /*case R.id.nav_show_users: {
         Intent alreadyLoggedInIntent = new Intent(TopListActivity.this, MapsActivity.class);
         TopListActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }*/
+      case R.id.myprofile: {
+        Intent intent = new Intent(TopListActivity.this, ProfileActivity.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        intent.putExtra("username", settings.getString("username", null));
+        TopListActivity.this.startActivity(intent);
         return true;
       }
       case R.id.nav_add_photo: {

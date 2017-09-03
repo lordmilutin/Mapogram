@@ -148,6 +148,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     registerReceiver(mDeviceDiscoverReceiver, filter);
 
+    final Button findFriendsBTN = (Button) findViewById(R.id.findFriends);
+    findFriendsBTN.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        if (runPollFriends) {
+          runPollFriends = false;
+          clearFriendMarkers();
+
+          findFriendsBTN.setText("Find Friends!");
+        } else {
+          runPollFriends = true;
+          getUsers(mLastLocation);
+          findFriendsBTN.setText("Turn Off Geolocation");
+        }
+
+      }
+    });
 
     getCategories();
 
@@ -288,7 +305,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
           SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-          mMap.addMarker(markerOptions).setTag( new CustomMarkerTag("user",  settings.getString("username", null)) );
+          mCurrentMarker = mMap.addMarker(markerOptions);
+          mCurrentMarker.setTag( new CustomMarkerTag("user",  settings.getString("username", null)) );
         }
       }, 0, 0, null,
       new Response.ErrorListener() {
@@ -376,6 +394,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .fromBitmap(createDrawableFromView(MapsActivity.this, markerView)));
                 markerOptions.position(latLng);
                 Marker result = mMap.addMarker(markerOptions);
+                result.setTag( new CustomMarkerTag("user",  friend.getUsername()) );
                   mFriendsMarkersHashMap.put(friend.getUsername(), result);
 
 
@@ -392,6 +411,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       } else {
         markerOptions.position(latLng);
         Marker result = mMap.addMarker(markerOptions);
+        result.setTag( new CustomMarkerTag("user",  friend.getUsername()) );
           mFriendsMarkersHashMap.put(friend.getUsername(), result);
       }
 
@@ -402,7 +422,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   public void pollFriends()
   {
-      runPollFriends = true;
+    runPollFriends = true;
     handler.postDelayed(runnablePollFriends, 3000);
   }
 
@@ -430,14 +450,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         friend.setLocation(obj.optString("location"));
 
                         String[] exploded = friend.getLocation().split(",");
-                        LatLng newPost = new LatLng(Double.parseDouble(exploded[0]), Double.parseDouble(exploded[1]));
+                        LatLng newPost = new LatLng(Double.parseDouble(exploded[1]), Double.parseDouble(exploded[0]));
 
                         Marker setMarker = mFriendsMarkersHashMap.get(obj.optString("username"));
-                        if (setMarker != null) {
 
+                        if (setMarker != null) {
                           setMarker.setPosition(newPost);
-                          setMarker.remove();
+                          Log.e("testMarkera", setMarker.getPosition().toString());
                         }
+
+                        if (runPollFriends)
+                          handler.postDelayed(runnablePollFriends, 3000);
 
                       }
 
@@ -493,8 +516,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sendFriendRequestViaBlootooth();
         return true;
       }
-      case R.id.nav_show_users: {
-        getUsers(mLastLocation);
+      case R.id.myprofile: {
+        Intent intent = new Intent(MapsActivity.this, ProfileActivity.class);
+        intent.putExtra("latitude", mLastLocation.getLatitude());
+        intent.putExtra("longitude", mLastLocation.getLongitude());
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        intent.putExtra("username", settings.getString("username", null));
+        MapsActivity.this.startActivity(intent);
         return true;
       }
       case R.id.nav_add_photo: {
@@ -694,6 +722,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   private void clearPhotoMarkers() {
     for (int i = 0; i < visibleMarkers.size(); i++ ) {
       visibleMarkers.get(i).remove();
+    }
+  }
+
+  private void clearFriendMarkers() {
+
+    for (String key : mFriendsMarkersHashMap.keySet()) {
+      mFriendsMarkersHashMap.get(key).remove();
+
     }
   }
 }
