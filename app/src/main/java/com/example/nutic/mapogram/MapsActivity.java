@@ -267,12 +267,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final MarkerOptions markerOptions = new MarkerOptions();
     markerOptions.position(latLng);
     markerOptions.title("Current Position");
-    mCurrentMarker = mMap.addMarker(markerOptions);
     mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
     final View markerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.cutom_marker, null);
     final ImageView avatar = (ImageView) markerView.findViewById(R.id.image_avatar);
-    ImageRequest request = new ImageRequest("http://mapogram.dejan7.com/avatars/avatar.jpg",
+    ImageRequest request = new ImageRequest("http://mapogram.dejan7.com/avatars/avatar.jpg",  // TODO change url
       new Response.Listener<Bitmap>() {
         @Override
         public void onResponse(Bitmap bitmap) {
@@ -280,7 +279,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           markerOptions.icon(BitmapDescriptorFactory
             .fromBitmap(createDrawableFromView(MapsActivity.this, markerView)));
           markerOptions.position(latLng);
-          mMap.addMarker(markerOptions);
+
+
+          SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+          mMap.addMarker(markerOptions).setTag( new CustomMarkerTag("user",  settings.getString("username", null)) ); // TODO change ID
         }
       }, 0, 0, null,
       new Response.ErrorListener() {
@@ -661,7 +663,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             markerOptions.title( photoJSON.getString("description") );
 
             Marker marker = mMap.addMarker(markerOptions);
-            marker.setTag(photoJSON.getString("id"));
+
+            marker.setTag( new CustomMarkerTag("photo", photoJSON.getString("id")) );
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
           } catch (JSONException e) {
@@ -699,19 +702,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   @Override
   public boolean onMarkerClick(Marker marker) {
 
-    Object tag = marker.getTag();
+    CustomMarkerTag tag = (CustomMarkerTag) marker.getTag();
 
-    if (tag != null) {  // Then is photo marker
+    if (tag.getType() == "photo") {  // Then is photo marker
       Intent intent = new Intent(MapsActivity.this, PhotoActivity.class);
 
       intent.putExtra("latitude", mLastLocation.getLatitude());
       intent.putExtra("longitude", mLastLocation.getLongitude());
-      intent.putExtra("photoId", tag.toString());
-
-      Toast.makeText(getApplicationContext(), "PhotoId: " +  tag.toString(), Toast.LENGTH_LONG).show();
+      intent.putExtra("photoId", tag.getId());
 
       MapsActivity.this.startActivity(intent);
     }
+
+    if (tag.getType() == "user") {  // Then is photo marker
+      Intent intent = new Intent(MapsActivity.this, ProfileActivity.class);
+      intent.putExtra("username", tag.getId());
+      MapsActivity.this.startActivity(intent);
+    }
+
     return false;
   }
 }
@@ -719,3 +727,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
+class CustomMarkerTag {
+
+  private final String type;
+  private final String id;
+
+  CustomMarkerTag(String type, String id) {
+    this.type = type;
+    this.id = id;
+  }
+
+  String getId() { return this.id; }
+  String getType() { return this.type; }
+}
