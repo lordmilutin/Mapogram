@@ -260,6 +260,7 @@ public class PhotoActivity extends AppCompatActivity implements NavigationView.O
 
         commentText.setText(comment.getString("text"));
         commentAuthorText.setText(commentAuthor.getString("username") + ":");
+        commentPhoto.setTag(commentAuthor.getString("username"));
       }
     }
   }
@@ -349,6 +350,15 @@ public class PhotoActivity extends AppCompatActivity implements NavigationView.O
         return false;
       }
     }
+  }
+
+  public void handleCommentPhotoClick(View view)
+  {
+    Intent intent = new Intent(PhotoActivity.this, ProfileActivity.class);
+    intent.putExtra("latitude", latitude);
+    intent.putExtra("longitude", longitude);
+    intent.putExtra("username", view.getTag().toString());
+    PhotoActivity.this.startActivity(intent);
   }
 }
 
