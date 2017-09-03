@@ -4,9 +4,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,7 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AddPhotoActivity extends AppCompatActivity {
+public class AddPhotoActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
   private String url = "http://mapogram.dejan7.com/api/photos";
   public static final String PREFS_NAME = "MapogramPrefs";
@@ -35,6 +38,9 @@ public class AddPhotoActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_add_photo);
 
+    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+    navigationView.setNavigationItemSelectedListener(this);
+
     // Handle photo button
     final Button takePhotoBtn = (Button) findViewById(R.id.takePhotoBtn);
     takePhotoBtn.setOnClickListener(new View.OnClickListener() {
@@ -43,6 +49,7 @@ public class AddPhotoActivity extends AppCompatActivity {
         startActivityForResult(intent, 0);
       }
     });
+
   }
 
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -111,4 +118,37 @@ public class AddPhotoActivity extends AppCompatActivity {
     RequestQueue queue = Volley.newRequestQueue(this);
     queue.add(jsObjRequest);
   }
+
+
+  @Override
+  public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    int id = item.getItemId();
+
+    switch (id) {
+      case R.id.nav_add_friend: {
+        Intent alreadyLoggedInIntent = new Intent(AddPhotoActivity.this, MapsActivity.class);
+        AddPhotoActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      case R.id.nav_show_users: {
+        Intent alreadyLoggedInIntent = new Intent(AddPhotoActivity.this, MapsActivity.class);
+        AddPhotoActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      case R.id.nav_add_photo: {
+        Intent alreadyLoggedInIntent = new Intent(AddPhotoActivity.this, AddPhotoActivity.class);
+        AddPhotoActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      case R.id.nav_top_list: {
+        Intent alreadyLoggedInIntent = new Intent(AddPhotoActivity.this, TopListActivity.class);
+        AddPhotoActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      default: {
+        return false;
+      }
+    }
+  }
+
 }

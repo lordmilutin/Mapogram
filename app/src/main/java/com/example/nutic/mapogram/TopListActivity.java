@@ -1,7 +1,11 @@
 package com.example.nutic.mapogram;
 
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -20,7 +24,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class TopListActivity extends AppCompatActivity {
+public class TopListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
   private String url = "http://mapogram.dejan7.com/api/users/toplist";
 
@@ -28,6 +32,9 @@ public class TopListActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_top_list);
+
+    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+    navigationView.setNavigationItemSelectedListener(this);
 
     loadToplist();
   }
@@ -78,4 +85,38 @@ public class TopListActivity extends AppCompatActivity {
     RequestQueue queue = Volley.newRequestQueue(this);
     queue.add(jsObjRequest);
   }
+
+
+
+  @Override
+  public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    int id = item.getItemId();
+
+    switch (id) {
+      case R.id.nav_add_friend: {
+        Intent alreadyLoggedInIntent = new Intent(TopListActivity.this, MapsActivity.class);
+        TopListActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      case R.id.nav_show_users: {
+        Intent alreadyLoggedInIntent = new Intent(TopListActivity.this, MapsActivity.class);
+        TopListActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      case R.id.nav_add_photo: {
+        Intent alreadyLoggedInIntent = new Intent(TopListActivity.this, AddPhotoActivity.class);
+        TopListActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      case R.id.nav_top_list: {
+        Intent alreadyLoggedInIntent = new Intent(TopListActivity.this, TopListActivity.class);
+        TopListActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      default: {
+        return false;
+      }
+    }
+  }
+
 }
