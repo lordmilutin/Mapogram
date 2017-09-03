@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item
+    android:id="@+id/nav_add_friend"
+    android:title="Add Friend" />
+
+  <item
+    android:id="@+id/nav_show_users"
+    android:title="Show users" />
+
+</menu>

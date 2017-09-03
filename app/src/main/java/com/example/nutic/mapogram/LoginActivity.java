@@ -122,11 +122,10 @@ public class LoginActivity extends AppCompatActivity {
     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
     String username = settings.getString("username", null);
 
-//  Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, MapsActivity.class);
+    Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, MapsActivity.class);
 //  Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, ProfileActivity.class);
 //  Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, AddPhotoActivity.class);
-
-    Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, TopListActivity.class);
+//  Intent alreadyLoggedInIntent = new Intent(LoginActivity.this, TopListActivity.class);
 
     alreadyLoggedInIntent.putExtra("username", username);
 
