@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout.LayoutParams;
@@ -70,6 +71,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -102,9 +104,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private  boolean runPollFriends = false;
 
-    private HashMap<Integer, Marker> mFriendsMarkersHashMap = new HashMap<Integer, Marker>();
+    private static HashMap<String, Marker> mFriendsMarkersHashMap = new HashMap<String, Marker>();
 
   private String urlPhotos = "http://mapogram.dejan7.com/api/photos";
+
+  private Handler handler = new Handler();
 
 
   @Override
@@ -310,7 +314,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 JSONObject obj = array.getJSONObject(i);
                 if (obj.optString("location") == "false")
                   continue;
-                Log.e("tagrrr", Integer.toString(i));
                 Friends friend = new Friends();
                 friend.setUsername(obj.optString("username"));
                 friend.setAvatar(obj.optString("avatar"));
@@ -369,7 +372,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .fromBitmap(createDrawableFromView(MapsActivity.this, markerView)));
                 markerOptions.position(latLng);
                 Marker result = mMap.addMarker(markerOptions);
-                  mFriendsMarkersHashMap.put(friend.getId(), result);
+                  mFriendsMarkersHashMap.put(friend.getUsername(), result);
+
+
+
               }
             }, 0, 0, null,
             new Response.ErrorListener() {
@@ -382,9 +388,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       } else {
         markerOptions.position(latLng);
         Marker result = mMap.addMarker(markerOptions);
-          mFriendsMarkersHashMap.put(friend.getId(), result);
+          mFriendsMarkersHashMap.put(friend.getUsername(), result);
       }
-        pollFriends();
+
+
+      pollFriends();
     }
   }
 
@@ -392,63 +400,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   {
 
       runPollFriends = true;
-      final Timer timer = new Timer();
+      /*final Timer timer = new Timer();
 
       final TimerTask task = new TimerTask() {
           @Override
           public void run() {
-              if(runPollFriends) {
-                  Map<String, String> params = new HashMap();
-                  params.put("location", String.valueOf(mLastLocation.getLongitude()) + "," + mLastLocation.getLatitude());
 
-                  JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST,
-                          "http://mapogram.dejan7.com/api/location/exchange", new JSONObject(params),
-                          new Response.Listener<JSONObject>() {
-                              @Override
-                              public void onResponse(JSONObject response) {
-                                  try {
-                                      JSONArray array = response.getJSONArray("friends");
-                                      List<Friends> friendsList = new ArrayList<>();
-                                      for (int i = 0; i < array.length(); i++) {
-                                          JSONObject obj = array.getJSONObject(i);
-                                          if (obj.optString("location") == "false")
-                                              continue;
-                                          Log.e("tagrrr", obj.optString("location"));
-                                          Friends friend = new Friends();
-                                          friend.setId(Integer.parseInt(obj.optString("id")));
-                                          friend.setLocation(obj.optString("location"));
-
-                                          String[] exploded = friend.getLocation().split(",");
-                                          LatLng newPost = new LatLng(Double.parseDouble(exploded[0]), Double.parseDouble(exploded[1]));
-
-
-                                          Marker test = mFriendsMarkersHashMap.get(friend.getId());
-                                          Log.e("tagrrr", test.getId());
-                                          test.setPosition(newPost);
-                                      }
-
-                                  } catch (JSONException e) {
-                                      e.printStackTrace();
-                                  }
-                              }
-                          }, new Response.ErrorListener() {
-                      @Override
-                      public void onErrorResponse(VolleyError error) {
-                          Log.e("tag", error.toString());
-                      }
-                  }) {
-                      @Override
-                      public Map<String, String> getHeaders() throws AuthFailureError {
-                          HashMap<String, String> headers = new HashMap<>();
-                          headers.put("Accept", "application/json");
-                          SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                          headers.put("Authorization", "Bearer " + settings.getString("token", null));
-                          return headers;
-                      }
-                  };
-
-                  RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-                  queue.add(jsObjRequest);
               } else {
                   timer.cancel();
                   timer.purge();
@@ -456,8 +413,94 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           }
       };
 
-      timer.schedule(task, 4000);
+      timer.schedule(task, 4000);*/
+
+    handler.postDelayed(runnablePollFriends, 3000);
   }
+
+  private Runnable runnablePollFriends = new Runnable() {
+    @Override
+    public void run() {
+      /*Set<Integer> keys = mFriendsMarkersHashMap.keySet();  //get all keys
+      for(Integer i: keys)
+      {
+        //System.out.println(i);
+        if (i != null)
+          Log.e("ovoJeInt", Integer.toString(i));
+      }
+      if (runPollFriends) {
+        for (int i = 15; i<20; i++) {
+
+          Marker setMarker = mFriendsMarkersHashMap.get(16);
+          if (setMarker != null) {
+            Log.e("tagrrr", "jeste");
+
+            setMarker.setPosition(new LatLng(10, 10));
+          }
+        }
+
+
+
+        handler.postDelayed(runnablePollFriends, 3000);
+*/
+        Map<String, String> params = new HashMap();
+        params.put("location", String.valueOf(mLastLocation.getLongitude()) + "," + mLastLocation.getLatitude());
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST,
+                "http://mapogram.dejan7.com/api/location/exchange", new JSONObject(params),
+                new Response.Listener<JSONObject>() {
+                  @Override
+                  public void onResponse(JSONObject response) {
+                    try {
+                      JSONArray array = response.getJSONArray("friends");
+                      List<Friends> friendsList = new ArrayList<>();
+                      for (int i = 0; i < array.length(); i++) {
+                        JSONObject obj = array.getJSONObject(i);
+                        if (obj.optString("location") == "false")
+                          continue;
+                        //Log.e("tagrrr", obj.optString("location"));
+                        Friends friend = new Friends();
+                        friend.setId(Integer.parseInt(obj.optString("id")));
+                        friend.setLocation(obj.optString("location"));
+
+                        String[] exploded = friend.getLocation().split(",");
+                        LatLng newPost = new LatLng(Double.parseDouble(exploded[0]), Double.parseDouble(exploded[1]));
+
+                        Marker setMarker = mFriendsMarkersHashMap.get(obj.optString("username"));
+                        if (setMarker != null) {
+
+                          setMarker.setPosition(newPost);
+                          setMarker.remove();
+                        }
+
+                      }
+
+                    } catch (JSONException e) {
+                      e.printStackTrace();
+                    }
+                  }
+                }, new Response.ErrorListener() {
+          @Override
+          public void onErrorResponse(VolleyError error) {
+            Log.e("tag", error.toString());
+          }
+        }) {
+          @Override
+          public Map<String, String> getHeaders() throws AuthFailureError {
+            HashMap<String, String> headers = new HashMap<>();
+            headers.put("Accept", "application/json");
+            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+            headers.put("Authorization", "Bearer " + settings.getString("token", null));
+            return headers;
+          }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        queue.add(jsObjRequest);
+
+      }
+
+  };
 
   public Bitmap createDrawableFromView(Context context, View view) {
     DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -554,11 +597,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             JSONObject tagJSON = response.getJSONObject(i);
             View tagView = getLayoutInflater().inflate(R.layout.tag, null);
             hScrollView.addView(tagView);
-            Log.e("tagg", tagJSON.getString("name"));
 
             final TextView tagBtn = (TextView) tagView.findViewById(R.id.tagButton);
 
             tagBtn.setText(tagJSON.getString("name"));
+
+            tagBtn.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                Log.e("test", tagBtn.getText().toString());
+              }
+            });
 
             /*commentText.setText(comment.getString("text"));
             commentAuthorText.setText(commentAuthor.getString("username") + ":");*/
