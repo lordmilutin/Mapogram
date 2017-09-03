@@ -2,11 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
   <item
+    android:id="@+id/nav_add_photo"
+    android:title="Add Photo" />
+
+  <item
     android:id="@+id/nav_add_friend"
     android:title="Add Friend" />
 
   <item
     android:id="@+id/nav_show_users"
     android:title="Show users" />
+
+  <item
+    android:id="@+id/nav_top_list"
+    android:title="Top List" />
+
+
 
 </menu>

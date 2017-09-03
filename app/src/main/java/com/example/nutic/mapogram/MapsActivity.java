@@ -287,6 +287,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getUsers(mLastLocation);
         return true;
       }
+      case R.id.nav_add_photo: {
+        Intent alreadyLoggedInIntent = new Intent(MapsActivity.this, AddPhotoActivity.class);
+        MapsActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
+      case R.id.nav_top_list: {
+        Intent alreadyLoggedInIntent = new Intent(MapsActivity.this, TopListActivity.class);
+        MapsActivity.this.startActivity(alreadyLoggedInIntent);
+        return true;
+      }
       default: {
         return false;
       }
