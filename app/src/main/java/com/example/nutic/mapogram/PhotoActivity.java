@@ -274,6 +274,7 @@ public class PhotoActivity extends AppCompatActivity implements NavigationView.O
       @Override
       public void onResponse(JSONObject response) {
         EditText commentTextArea = (EditText) findViewById(R.id.commentTextarea);
+          commentTextArea.setText("");
         myRecreate();
       }
     }, new Response.ErrorListener() {

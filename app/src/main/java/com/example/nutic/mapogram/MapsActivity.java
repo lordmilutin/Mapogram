@@ -104,6 +104,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String urlCategories = "http://mapogram.dejan7.com/api/categories";
 
     private boolean runPollFriends = false;
+    private boolean runPollFriendsWasRunning = false;
 
     private static HashMap<String, Marker> mFriendsMarkersHashMap = new HashMap<String, Marker>();
 
@@ -154,14 +155,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 if (runPollFriends) {
-                    runPollFriends = false;
-                    clearFriendMarkers();
-
-                    findFriendsBTN.setText("Find Friends!");
+                    stopLocationExchange();
                 } else {
-                    runPollFriends = true;
-                    getUsers(mLastLocation);
-                    findFriendsBTN.setText("Turn Off Geolocation");
+                    startLocationExchange();
                 }
 
             }
@@ -171,6 +167,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    public void startLocationExchange() {
+        final Button findFriendsBTN = (Button) findViewById(R.id.findFriends);
+        runPollFriends = true;
+        getUsers(mLastLocation);
+        findFriendsBTN.setText("Turn Off Geolocation");
+    }
+
+    public void stopLocationExchange() {
+        final Button findFriendsBTN = (Button) findViewById(R.id.findFriends);
+        runPollFriends = false;
+        clearFriendMarkers();
+        findFriendsBTN.setText("Find Friends!");
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -422,7 +431,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void pollFriends() {
         runPollFriends = true;
-        handler.postDelayed(runnablePollFriends, 3000);
+        handler.postDelayed(runnablePollFriends, 5000);
     }
 
     private Runnable runnablePollFriends = new Runnable() {
@@ -459,7 +468,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     }
 
                                     if (runPollFriends)
-                                        handler.postDelayed(runnablePollFriends, 3000);
+                                        handler.postDelayed(runnablePollFriends, 5000);
 
                                 }
 
@@ -772,6 +781,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     EditText radius = (EditText) findViewById(R.id.editText4);
     getMarkers(mLastLocation.getLatitude(), mLastLocation.getLongitude(), Integer.valueOf(radius.getText().toString()));
   }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        runPollFriendsWasRunning = runPollFriends;
+        stopLocationExchange();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (runPollFriendsWasRunning)
+            startLocationExchange();
+    }
 }
 
 
