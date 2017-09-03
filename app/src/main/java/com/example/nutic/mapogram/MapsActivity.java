@@ -97,6 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   private BroadcastReceiver mDeviceDiscoverReceiver;
   private BluetoothAdapter mBluetoothAdapter;
 
+  private ArrayList<Marker> visibleMarkers = new ArrayList<Marker>();
+
   private String urlCategories = "http://mapogram.dejan7.com/api/categories";
 
 
@@ -254,7 +256,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   public void onLocationChanged(Location location) {
     mLastLocation = location;
     updateCurrentLocation(location);
-    getMarkers();
+    getMarkers(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 500000);  //500km
   }
 
   private void updateCurrentLocation(Location location) {
@@ -604,17 +606,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     queue.add(jsObjRequest);
   }
 
-  private void getMarkers() {
+  private void getMarkers(Double latitude, Double longitude, int distance) {
 
-    String url = urlPhotos + "/" + String.valueOf(mLastLocation.getLatitude()) + "," + String.valueOf(mLastLocation.getLongitude()) + "/5000000";
+    String url = urlPhotos + "/" + String.valueOf(latitude) + "," + String.valueOf(longitude) + "/" + String.valueOf(distance);
+    clearPhotoMarkers();
 
     JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
       @Override
       public void onResponse(JSONArray response) {
-
         for (int i = 0; i < response.length(); i++) {
           try {
-
             JSONObject photoJSON = response.getJSONObject(i);
 
             String location = photoJSON.getString("location");
@@ -629,6 +630,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             marker.setTag( new CustomMarkerTag("photo", photoJSON.getString("id")) );
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+            visibleMarkers.add(marker);
 
           } catch (JSONException e) {
             e.printStackTrace();
@@ -664,7 +667,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   @Override
   public boolean onMarkerClick(Marker marker) {
-
     CustomMarkerTag tag = (CustomMarkerTag) marker.getTag();
 
     if (tag.getType() == "photo") {  // Then is photo marker
@@ -684,6 +686,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     return false;
+  }
+
+  private void clearPhotoMarkers() {
+    for (int i = 0; i < visibleMarkers.size(); i++ ) {
+      visibleMarkers.get(i).remove();
+    }
   }
 }
 

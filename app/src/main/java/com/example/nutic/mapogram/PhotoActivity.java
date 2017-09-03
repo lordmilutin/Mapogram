@@ -82,32 +82,98 @@ public class PhotoActivity extends AppCompatActivity implements NavigationView.O
     likeBTN.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        Log.e("nes", photoLngLatString);
-        String[] lnglat = photoLngLatString.split(",");
-        double lng = Double.parseDouble(lnglat[0]);
-        double lat = Double.parseDouble(lnglat[1]);
+        Location userLocation = new Location("");
+        userLocation.setLatitude(latitude);
+        userLocation.setLongitude(longitude);
 
-        LatLng photoLocation = new LatLng(lat, lng);
+        String[] split = photoLngLatString.split(",");
+        Location photoLocation = new Location("");
+        photoLocation.setLatitude( Double.valueOf(split[0]));
+        photoLocation.setLongitude( Double.valueOf(split[1]));
 
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        Log.e("nes2", String.valueOf(location.getLatitude()));
-        Log.e("nes2", String.valueOf(location.getLatitude()));
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-          // TODO: Consider calling
-          Log.e("nes2", "nema nista");
-          //    ActivityCompat#requestPermissions
-          // here to request the missing permissions, and then overriding
-          //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-          //                                          int[] grantResults)
-          // to handle the case where the user grants the permission. See the documentation
-          // for ActivityCompat#requestPermissions for more details.
-          return;
+        float distanceInMeters = userLocation.distanceTo(photoLocation);
+
+        if (distanceInMeters > 1000 * 200000){
+          Toast.makeText(getApplicationContext(), "You must be in radius of 1000m of image to like it" , Toast.LENGTH_LONG).show();
+          Toast.makeText(getApplicationContext(), "Current distance in meters: " + String.valueOf(distanceInMeters) , Toast.LENGTH_LONG).show();
+        } else {
+
+          SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+          Boolean photoLiked = settings.getBoolean("photo_" + id, false);
+
+          if (photoLiked) {
+            Toast.makeText(getApplicationContext(), "You have already liked this photo" , Toast.LENGTH_LONG).show();
+            Button likeBtn = (Button) findViewById(R.id.likebtn);
+            likeBtn.setText("Liked");
+          } else {
+            sendLikePhotoRequest();
+          }
         }
       }
     });
 
     loadPhoto();
+
+    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+    Boolean photoLiked = settings.getBoolean("photo_" + id, false);
+    if(photoLiked) {
+      Button likeBtn = (Button) findViewById(R.id.likebtn);
+      likeBtn.setText("Liked");
+    }
+  }
+
+  private void sendLikePhotoRequest() {
+    JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + this.id + "/likes", new JSONObject(), new Response.Listener<JSONObject>() {
+      @Override
+      public void onResponse(JSONObject response) {
+        successfullyLikedPhoto();
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("photo_" + id, true);
+        editor.apply();
+      }
+    }, new Response.ErrorListener() {
+      @Override
+      public void onErrorResponse(VolleyError error) {
+        String message = "";
+        try {
+          JSONObject errResponse = new JSONObject(new String(error.networkResponse.data));
+          message = errResponse.getString("error");
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+        Toast.makeText(getApplicationContext(), "Error: " + message, Toast.LENGTH_LONG).show();
+      }
+    }) {
+      @Override
+      public Map<String, String> getHeaders() throws AuthFailureError {
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put("Accept", "application/json");
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        headers.put("Authorization", "Bearer " + settings.getString("token", null));
+        return headers;
+      }
+    };
+
+    RequestQueue queue = Volley.newRequestQueue(this);
+    queue.add(jsObjRequest);
+  }
+
+  private void successfullyLikedPhoto() {
+    Toast.makeText(getApplicationContext(), "Successfuly liked photo!" , Toast.LENGTH_LONG).show();
+
+    TextView likes = (TextView) findViewById(R.id.likes);
+    String likesStr = likes.getText().toString();
+
+    likesStr = likesStr.replace("s", "").replace("Like", "").trim();
+
+    int likesNr = Integer.parseInt( likesStr ) + 1;
+    likes.setText(likesNr == 1 ? "1 Like" : likesNr + " Likes");
+
+
+    Button likeBtn = (Button) findViewById(R.id.likebtn);
+    likeBtn.setText("Liked");
   }
 
   /**
@@ -119,6 +185,7 @@ public class PhotoActivity extends AppCompatActivity implements NavigationView.O
 
     final TextView author = (TextView) findViewById(R.id.author);
     final TextView likes = (TextView) findViewById(R.id.likes);
+    final TextView categories = (TextView) findViewById(R.id.categoriesTextView);
 
     JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + this.id, null, new Response.Listener<JSONObject>() {
       @Override
@@ -133,6 +200,7 @@ public class PhotoActivity extends AppCompatActivity implements NavigationView.O
           int likesNr = Integer.parseInt(response.getString("likes"));
           likes.setText(likesNr == 1 ? "1 Like" : likesNr + " Likes");
           JSONArray comments = response.getJSONArray("comments");
+          categories.setText(response.getString("categories"));
 
           photoLngLatString = response.getString("location");
 
