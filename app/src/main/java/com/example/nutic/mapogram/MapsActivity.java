@@ -21,11 +21,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
@@ -45,7 +47,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -122,7 +123,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   @Override
   protected void onStop() {
     super.onStop();
-    mBluetoothAdapter.cancelDiscovery();
+    if(mBluetoothAdapter != null) {
+      mBluetoothAdapter.cancelDiscovery();
+    }
     if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
       mGoogleApiClient.disconnect();
     }
@@ -229,48 +232,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   }
 
   private void getUsers(final Location location) {
-    RequestQueue queue = Volley.newRequestQueue(this);
-    // Request a string response from the provided URL.
-    String apiUrl = "http://mapogram.dejan7.com/api/location/exchange";
 
-    final StringRequest jsObjRequest = new StringRequest(Method.POST, apiUrl,
-        new Response.Listener<String>() {
-          @Override
-          public void onResponse(String response) {
-            Log.d("TAG", "onResponse: " + response);
-            try {
-              JSONObject array = new JSONObject(response);
-            } catch (JSONException e) {
-              e.printStackTrace();
-            }
-          }
-        }, new ErrorListener() {
+    Map<String, String> params = new HashMap();
+    params.put("location", "21.892018,43.318496");
+
+    JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, "http://mapogram.dejan7.com/api/location/exchange", new JSONObject(params), new Response.Listener<JSONObject>() {
+      @Override
+      public void onResponse(JSONObject response) {
+        Log.e("tag", response.toString());
+      }
+    }, new Response.ErrorListener() {
       @Override
       public void onErrorResponse(VolleyError error) {
-        error.printStackTrace();
+        Log.e("tag", error.toString());
       }
     }) {
-
-      @Override
-      protected Map<String, String> getParams() throws AuthFailureError {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("location",
-            "21.892018,43.318496");
-        return params;
-      }
-
       @Override
       public Map<String, String> getHeaders() throws AuthFailureError {
         HashMap<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        headers.put("Authorization", "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj" /*+ settings.getString("token", null)*/);
+        headers.put("Accept", "application/json");
+        headers.put("Authorization", "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj");
         return headers;
       }
     };
 
-    // Add the request to the RequestQueue.
+    RequestQueue queue = Volley.newRequestQueue(this);
     queue.add(jsObjRequest);
+
   }
 
   @Override
@@ -305,8 +293,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   private void sendFriendRequestViaBlootooth() {
     mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    if (mBluetoothAdapter.isEnabled()) {
-      if (mBluetoothAdapter != null) {
+    if (mBluetoothAdapter != null) {
+      if (mBluetoothAdapter.isEnabled()) {
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
       } else {
