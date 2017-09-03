@@ -1,15 +1,19 @@
 package com.example.nutic.mapogram;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -20,6 +24,7 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,30 +69,36 @@ public class RegisterActivity extends AppCompatActivity {
 
   public void submitForm(View v) {
 
-    EditText usernameTf   = (EditText) findViewById(R.id.usernameTf);
-    EditText firstNameTf  = (EditText) findViewById(R.id.firstNameTf);
-    EditText lastNameTf   = (EditText) findViewById(R.id.lastNameTf);
-    EditText emailTf      = (EditText) findViewById(R.id.emailTf);
-    EditText phoneTf      = (EditText) findViewById(R.id.phoneNumberTf);
-    EditText passwordTf   = (EditText) findViewById(R.id.passwordTf);
+    EditText usernameTf = (EditText) findViewById(R.id.usernameTf);
+    EditText firstNameTf = (EditText) findViewById(R.id.firstNameTf);
+    EditText lastNameTf = (EditText) findViewById(R.id.lastNameTf);
+    EditText emailTf = (EditText) findViewById(R.id.emailTf);
+    EditText phoneTf = (EditText) findViewById(R.id.phoneNumberTf);
+    EditText passwordTf = (EditText) findViewById(R.id.passwordTf);
     EditText passwordConfTf = (EditText) findViewById(R.id.passwordConfTf);
+    ImageView photoView = (ImageView) findViewById(R.id.photoView);
+
+    Bitmap bitmap = ((BitmapDrawable) photoView.getDrawable()).getBitmap();
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+    byte[] byteArray = stream.toByteArray();
+    String base64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
     if (usernameTf.getText().toString().trim().equals("")) {
       Toast.makeText(getApplicationContext(), "Username is required!", Toast.LENGTH_LONG).show();
-    }
-    else if (passwordTf.getText().toString().trim().equals("")) {
+    } else if (passwordTf.getText().toString().trim().equals("")) {
       Toast.makeText(getApplicationContext(), "Password is required!", Toast.LENGTH_LONG).show();
-    }
-    else {
+    } else {
       Map<String, String> params = new HashMap();
 
-      params.put("username",    usernameTf.getText().toString().trim());
-      params.put("email",       emailTf.getText().toString().trim());
-      params.put("first_name",  firstNameTf.getText().toString().trim());
-      params.put("last_name",   lastNameTf.getText().toString().trim());
-      params.put("phone",       phoneTf.getText().toString().trim());
-      params.put("password",    passwordTf.getText().toString().trim());
+      params.put("username", usernameTf.getText().toString().trim());
+      params.put("email", emailTf.getText().toString().trim());
+      params.put("first_name", firstNameTf.getText().toString().trim());
+      params.put("last_name", lastNameTf.getText().toString().trim());
+      params.put("phone", phoneTf.getText().toString().trim());
+      params.put("password", passwordTf.getText().toString().trim());
       params.put("password_confirmation", passwordConfTf.getText().toString().trim());
+      params.put("img", "data:image/jpeg;base64," + base64);
 
       // Instantiate the RequestQueue.
       RequestQueue queue = Volley.newRequestQueue(this);
@@ -115,7 +126,14 @@ public class RegisterActivity extends AppCompatActivity {
             }
             Toast.makeText(getApplicationContext(), "Error: " + message, Toast.LENGTH_LONG).show();
           }
-        });
+        }) {
+        @Override
+        public Map<String, String> getHeaders() throws AuthFailureError {
+          HashMap<String, String> headers = new HashMap<String, String>();
+          headers.put("Content-Type", "application/json");
+          return headers;
+        }
+      };
 
       // Add the request to the RequestQueue.
       queue.add(jsObjRequest);

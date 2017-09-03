@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -62,11 +61,9 @@ public class AddPhotoActivity extends AppCompatActivity {
     ImageView imageView2 = (ImageView) findViewById(R.id.imageView2);
 
     Bitmap bitmap = ((BitmapDrawable)imageView2.getDrawable()).getBitmap();
-
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
     byte[] byteArray = stream.toByteArray();
-
     String base64 = Base64.encodeToString(byteArray , Base64.DEFAULT);
 
     Map<String, String> params = new HashMap();
@@ -103,7 +100,7 @@ public class AddPhotoActivity extends AppCompatActivity {
       @Override
       public Map<String, String> getHeaders() throws AuthFailureError {
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("Content-Type","application/json");
+        headers.put("Content-Type", "application/json");
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         headers.put("Authorization", "Bearer " + settings.getString("token", null));
         return headers;
