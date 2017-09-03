@@ -35,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -76,8 +77,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-    ConnectionCallbacks, OnConnectionFailedListener, OnMarkerClickListener, LocationListener,
-    NavigationView.OnNavigationItemSelectedListener {
+  ConnectionCallbacks, OnConnectionFailedListener, OnMarkerClickListener, LocationListener,
+  NavigationView.OnNavigationItemSelectedListener {
 
   public static final String PREFS_NAME = "MapogramPrefs";
   private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -93,8 +94,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   private BluetoothAdapter mBluetoothAdapter;
 
   private String urlCategories = "http://mapogram.dejan7.com/api/categories";
-  private String url = "http://mapogram.dejan7.com/api/photos/{location}/{distance}";
-
+  private String urlPhotos = "http://mapogram.dejan7.com/api/photos";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -102,15 +102,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     setContentView(R.layout.activity_maps);
 
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-        .findFragmentById(R.id.map);
+      .findFragmentById(R.id.map);
     mapFragment.getMapAsync(this);
 
     if (mGoogleApiClient == null) {
       mGoogleApiClient = new GoogleApiClient.Builder(this)
-          .addConnectionCallbacks(this)
-          .addOnConnectionFailedListener(this)
-          .addApi(LocationServices.API)
-          .build();
+        .addConnectionCallbacks(this)
+        .addOnConnectionFailedListener(this)
+        .addApi(LocationServices.API)
+        .build();
     }
 
     NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -171,13 +171,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   private void setUpMap() {
     if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION)
-        != PackageManager.PERMISSION_GRANTED
-        && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
-        != PackageManager.PERMISSION_GRANTED) {
+      != PackageManager.PERMISSION_GRANTED
+      && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
+      != PackageManager.PERMISSION_GRANTED) {
 
       ActivityCompat.requestPermissions(this,
-          new String[]{permission.ACCESS_FINE_LOCATION},
-          LOCATION_PERMISSION_REQUEST_CODE);
+        new String[]{permission.ACCESS_FINE_LOCATION},
+        LOCATION_PERMISSION_REQUEST_CODE);
     } else {
       initMap();
     }
@@ -185,9 +185,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   private void initMap() {
     if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION)
-        != PackageManager.PERMISSION_GRANTED
-        && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
-        != PackageManager.PERMISSION_GRANTED) {
+      != PackageManager.PERMISSION_GRANTED
+      && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
+      != PackageManager.PERMISSION_GRANTED) {
       return;
     }
     mMap.setMyLocationEnabled(true);
@@ -196,7 +196,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-      @NonNull int[] grantResults) {
+                                         @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
     switch (requestCode) {
@@ -218,10 +218,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     mLocationRequest.setFastestInterval(50000);
     mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     if (ContextCompat.checkSelfPermission(this,
-        permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+      permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
       LocationServices.FusedLocationApi
-          .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
   }
 
@@ -236,28 +236,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   }
 
   @Override
-  public boolean onMarkerClick(Marker marker) {
-    return false;
-  }
-
-  @Override
   public void onLocationChanged(Location location) {
     mLastLocation = location;
     updateCurrentLocation(location);
+    getMarkers();
   }
 
   private void updateCurrentLocation(Location location) {
-    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+    final LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
     if (mCurrentMarker != null) {
       mCurrentMarker.remove();
     }
 
-    MarkerOptions markerOptions = new MarkerOptions();
+    final MarkerOptions markerOptions = new MarkerOptions();
     markerOptions.position(latLng);
     markerOptions.title("Current Position");
     mCurrentMarker = mMap.addMarker(markerOptions);
     mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+
+    final View markerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.cutom_marker, null);
+    final ImageView avatar = (ImageView) markerView.findViewById(R.id.image_avatar);
+    ImageRequest request = new ImageRequest("http://mapogram.dejan7.com/avatars/avatar.jpg",
+      new Response.Listener<Bitmap>() {
+        @Override
+        public void onResponse(Bitmap bitmap) {
+          avatar.setImageBitmap(bitmap);
+          markerOptions.icon(BitmapDescriptorFactory
+            .fromBitmap(createDrawableFromView(MapsActivity.this, markerView)));
+          markerOptions.position(latLng);
+          mMap.addMarker(markerOptions);
+        }
+      }, 0, 0, null,
+      new Response.ErrorListener() {
+        public void onErrorResponse(VolleyError error) {
+
+        }
+      });
+    RequestQueue queue = Volley.newRequestQueue(this);
+    queue.add(request);
+
   }
 
   private void getUsers(final Location location) {
@@ -266,31 +284,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     params.put("location", String.valueOf(location.getLongitude()) + "," + location.getLatitude());
 
     JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST,
-        "http://mapogram.dejan7.com/api/location/exchange", new JSONObject(params),
-        new Response.Listener<JSONObject>() {
-          @Override
-          public void onResponse(JSONObject response) {
-            try {
-              JSONArray array = response.getJSONArray("friends");
-              List<Friends> friendsList = new ArrayList<>();
-              for (int i = 0; i < array.length(); i++) {
-                JSONObject obj = array.getJSONObject(i);
-                Friends friend = new Friends();
-                friend.setUsername(obj.optString("username"));
-                friend.setAvatar(obj.optString("avatar"));
-                friend.setFirstName(obj.optString("first_name"));
-                friend.setLastName(obj.optString("last_name"));
-                friend.setLocation(obj.optString("location"));
-                friendsList.add(friend);
-              }
-
-              showFriendsOnMap(friendsList);
-
-            } catch (JSONException e) {
-              e.printStackTrace();
+      "http://mapogram.dejan7.com/api/location/exchange", new JSONObject(params),
+      new Response.Listener<JSONObject>() {
+        @Override
+        public void onResponse(JSONObject response) {
+          try {
+            JSONArray array = response.getJSONArray("friends");
+            List<Friends> friendsList = new ArrayList<>();
+            for (int i = 0; i < array.length(); i++) {
+              JSONObject obj = array.getJSONObject(i);
+              Friends friend = new Friends();
+              friend.setUsername(obj.optString("username"));
+              friend.setAvatar(obj.optString("avatar"));
+              friend.setFirstName(obj.optString("first_name"));
+              friend.setLastName(obj.optString("last_name"));
+              friend.setLocation(obj.optString("location"));
+              friendsList.add(friend);
             }
+
+            showFriendsOnMap(friendsList);
+
+          } catch (JSONException e) {
+            e.printStackTrace();
           }
-        }, new Response.ErrorListener() {
+        }
+      }, new Response.ErrorListener() {
       @Override
       public void onErrorResponse(VolleyError error) {
         Log.e("tag", error.toString());
@@ -301,7 +319,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
         headers.put("Authorization",
-            "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj");
+          "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj");
         return headers;
       }
     };
@@ -316,28 +334,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       markerOptions.title(friend.getUsername());
       String lng = friend.getLocation().substring(0, friend.getLocation().indexOf(","));
       String lat = friend.getLocation()
-          .substring(friend.getLocation().indexOf(",") + 1, friend.getLocation().length());
+        .substring(friend.getLocation().indexOf(",") + 1, friend.getLocation().length());
       final LatLng latLng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
       if (friend.getAvatar() != null) {
         final View markerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-            .inflate(R.layout.cutom_marker, null);
+          .inflate(R.layout.cutom_marker, null);
         final ImageView avatar = (ImageView) markerView.findViewById(R.id.image_avatar);
         ImageRequest request = new ImageRequest(friend.getAvatar(),
-            new Response.Listener<Bitmap>() {
-              @Override
-              public void onResponse(Bitmap bitmap) {
-                avatar.setImageBitmap(bitmap);
-                markerOptions.icon(BitmapDescriptorFactory
-                    .fromBitmap(createDrawableFromView(MapsActivity.this, markerView)));
-                markerOptions.position(latLng);
-                mMap.addMarker(markerOptions);
-              }
-            }, 0, 0, null,
-            new Response.ErrorListener() {
-              public void onErrorResponse(VolleyError error) {
+          new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap bitmap) {
+              avatar.setImageBitmap(bitmap);
+              markerOptions.icon(BitmapDescriptorFactory
+                .fromBitmap(createDrawableFromView(MapsActivity.this, markerView)));
+              markerOptions.position(latLng);
+              mMap.addMarker(markerOptions);
+            }
+          }, 0, 0, null,
+          new Response.ErrorListener() {
+            public void onErrorResponse(VolleyError error) {
 
-              }
-            });
+            }
+          });
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
       } else {
@@ -355,7 +373,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
     view.buildDrawingCache();
     Bitmap bitmap = Bitmap
-        .createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+      .createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
 
     Canvas canvas = new Canvas(bitmap);
     view.draw(canvas);
@@ -415,7 +433,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     if (requestCode == REQUEST_ENABLE_BT) {
       if (resultCode == RESULT_OK) {
         Intent discoverableIntent =
-            new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+          new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
         startActivity(discoverableIntent);
         mBluetoothAdapter.startDiscovery();
@@ -424,11 +442,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   }
 
   private void getCategories() {
-    JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, urlCategories,  null, new Response.Listener<JSONArray>() {
+    JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, urlCategories, null, new Response.Listener<JSONArray>() {
       @Override
       public void onResponse(JSONArray response) {
         final LinearLayout hScrollView = (LinearLayout) findViewById(R.id.tagsScroll);
-        for (int i=0; i< response.length();i++) {
+        for (int i = 0; i < response.length(); i++) {
           try {
             JSONObject tagJSON = response.getJSONObject(i);
             View tagView = getLayoutInflater().inflate(R.layout.tag, null);
@@ -471,6 +489,82 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     RequestQueue queue = Volley.newRequestQueue(this);
     queue.add(jsObjRequest);
+  }
+
+  private void getMarkers() {
+
+    String url = urlPhotos + "/" + String.valueOf(mLastLocation.getLatitude()) + "," + String.valueOf(mLastLocation.getLongitude()) + "/5000000";
+
+    JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+      @Override
+      public void onResponse(JSONArray response) {
+
+        for (int i = 0; i < response.length(); i++) {
+          try {
+
+            JSONObject photoJSON = response.getJSONObject(i);
+
+            String location = photoJSON.getString("location");
+            String[] split = location.split(",");
+
+            LatLng latLng = new LatLng( Double.valueOf(split[0]), Double.valueOf(split[1]));
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title( photoJSON.getString("description") );
+
+            Marker marker = mMap.addMarker(markerOptions);
+            marker.setTag(photoJSON.getString("id"));
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+          } catch (JSONException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }, new Response.ErrorListener() {
+      @Override
+      public void onErrorResponse(VolleyError error) {
+        String message = "";
+        try {
+          JSONObject errResponse = new JSONObject(new String(error.networkResponse.data));
+          message = errResponse.getString("error");
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+        Toast.makeText(getApplicationContext(), "Error: " + message, Toast.LENGTH_LONG).show();
+      }
+    }) {
+      @Override
+      public Map<String, String> getHeaders() throws AuthFailureError {
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put("Accept", "application/json");
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        headers.put("Authorization", "Bearer " + settings.getString("token", null));
+        return headers;
+      }
+    };
+
+    RequestQueue queue = Volley.newRequestQueue(this);
+    queue.add(jsObjRequest);
+  }
+
+  @Override
+  public boolean onMarkerClick(Marker marker) {
+
+    Object tag = marker.getTag();
+
+    if (tag != null) {  // Then is photo marker
+      Intent intent = new Intent(MapsActivity.this, PhotoActivity.class);
+
+      intent.putExtra("latitude", mLastLocation.getLatitude());
+      intent.putExtra("longitude", mLastLocation.getLongitude());
+      intent.putExtra("photoId", tag.toString());
+
+      Toast.makeText(getApplicationContext(), "PhotoId: " +  tag.toString(), Toast.LENGTH_LONG).show();
+
+      MapsActivity.this.startActivity(intent);
+    }
+    return false;
   }
 }
 
