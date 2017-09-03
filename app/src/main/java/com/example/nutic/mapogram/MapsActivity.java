@@ -17,8 +17,15 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -27,6 +34,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -45,8 +53,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.vision.text.Line;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,7 +79,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   private BroadcastReceiver mDeviceDiscoverReceiver;
   private BluetoothAdapter mBluetoothAdapter;
 
+  private String urlCategories = "http://mapogram.dejan7.com/api/categories";
   private String url = "http://mapogram.dejan7.com/api/photos/{location}/{distance}";
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +119,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     };
 
     registerReceiver(mDeviceDiscoverReceiver, filter);
+    getCategories();
+
   }
 
   @Override
@@ -316,6 +332,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mBluetoothAdapter.startDiscovery();
       }
     }
+  }
+
+  private void getCategories() {
+    JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, urlCategories,  null, new Response.Listener<JSONArray>() {
+      @Override
+      public void onResponse(JSONArray response) {
+        final LinearLayout hScrollView = (LinearLayout) findViewById(R.id.tagsScroll);
+        for (int i=0; i< response.length();i++) {
+          try {
+            JSONObject tagJSON = response.getJSONObject(i);
+            View tagView = getLayoutInflater().inflate(R.layout.tag, null);
+            hScrollView.addView(tagView);
+            Log.e("tagg", tagJSON.getString("name"));
+
+            final TextView tagBtn = (TextView) tagView.findViewById(R.id.tagButton);
+
+            tagBtn.setText(tagJSON.getString("name"));
+
+            /*commentText.setText(comment.getString("text"));
+            commentAuthorText.setText(commentAuthor.getString("username") + ":");*/
+          } catch (JSONException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }, new Response.ErrorListener() {
+      @Override
+      public void onErrorResponse(VolleyError error) {
+        String message = "";
+        try {
+          JSONObject errResponse = new JSONObject(new String(error.networkResponse.data));
+          message = errResponse.getString("error");
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+        Toast.makeText(getApplicationContext(), "Error: " + message, Toast.LENGTH_LONG).show();
+      }
+    }) {
+      @Override
+      public Map<String, String> getHeaders() throws AuthFailureError {
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put("Accept", "application/json");
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        headers.put("Authorization", "Bearer " + settings.getString("token", null));
+        return headers;
+      }
+    };
+
+    RequestQueue queue = Volley.newRequestQueue(this);
+    queue.add(jsObjRequest);
   }
 }
 

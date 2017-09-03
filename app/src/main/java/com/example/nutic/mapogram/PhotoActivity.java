@@ -110,8 +110,6 @@ public class PhotoActivity extends AppCompatActivity {
     final TextView author = (TextView) findViewById(R.id.author);
     final TextView likes = (TextView) findViewById(R.id.likes);
 
-    Toast.makeText(getApplicationContext(), "Error: " + this.id , Toast.LENGTH_LONG).show();
-
     JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + this.id, null, new Response.Listener<JSONObject>() {
       @Override
       public void onResponse(JSONObject response) {
