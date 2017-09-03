@@ -44,7 +44,11 @@ public class ProfileActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_profile);
 
-    loadProfile();
+    //loadProfile();
+  }
+
+  private void loadProfile2() {
+
   }
 
   private void loadProfile() {

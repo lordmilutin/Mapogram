@@ -155,7 +155,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 if (runPollFriends) {
-                    stopLocationExchange();
+                    stopLocationExchange(true);
                 } else {
                     startLocationExchange(true);
                 }
@@ -177,10 +177,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         findFriendsBTN.setText("Turn Off Geolocation");
     }
 
-    public void stopLocationExchange() {
+    public void stopLocationExchange(Boolean removeMarkers) {
         final Button findFriendsBTN = (Button) findViewById(R.id.findFriends);
         runPollFriends = false;
-        clearFriendMarkers();
+        if (removeMarkers)
+            clearFriendMarkers();
+
         findFriendsBTN.setText("Find Friends!");
     }
     @Override
@@ -469,11 +471,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         setMarker.setPosition(newPost);
                                         Log.e("testMarkera", setMarker.getPosition().toString());
                                     }
-
+                                }
                                     if (runPollFriends)
                                         handler.postDelayed(runnablePollFriends, 3000);
-
-                                }
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -790,7 +790,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onPause();
 
         runPollFriendsWasRunning = runPollFriends;
-        stopLocationExchange();
+        stopLocationExchange(false);
     }
 
     @Override
