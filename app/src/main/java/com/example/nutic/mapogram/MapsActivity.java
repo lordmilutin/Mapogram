@@ -662,8 +662,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       intent.putExtra("longitude", mLastLocation.getLongitude());
       intent.putExtra("photoId", tag.getId());
 
-      Toast.makeText(getApplicationContext(), "PhotoId: " +  tag.toString(), Toast.LENGTH_LONG).show();
-
       MapsActivity.this.startActivity(intent);
     }
 
