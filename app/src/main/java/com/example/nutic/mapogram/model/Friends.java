@@ -1,9 +1,5 @@
 package com.example.nutic.mapogram.model;
 
-/**
- * Created by Dusan on 03.Sep.17.
- */
-
 public class Friends {
   private Integer id;
   private String username;

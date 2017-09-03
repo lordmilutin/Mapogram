@@ -69,6 +69,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 import org.json.JSONArray;
@@ -95,6 +97,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   private String urlCategories = "http://mapogram.dejan7.com/api/categories";
   private String url = "http://mapogram.dejan7.com/api/photos/{location}/{distance}";
 
+    private  boolean runPollFriends = false;
+
+    private HashMap<Integer, Marker> mFriendsMarkersHashMap = new HashMap<Integer, Marker>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +137,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     };
 
     registerReceiver(mDeviceDiscoverReceiver, filter);
+
+
     getCategories();
 
   }
@@ -275,6 +282,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
               List<Friends> friendsList = new ArrayList<>();
               for (int i = 0; i < array.length(); i++) {
                 JSONObject obj = array.getJSONObject(i);
+                if (obj.optString("location") == "false")
+                  continue;
+                Log.e("tagrrr", Integer.toString(i));
                 Friends friend = new Friends();
                 friend.setUsername(obj.optString("username"));
                 friend.setAvatar(obj.optString("avatar"));
@@ -300,8 +310,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       public Map<String, String> getHeaders() throws AuthFailureError {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
-        headers.put("Authorization",
-            "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj");
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        headers.put("Authorization", "Bearer " + settings.getString("token", null));
         return headers;
       }
     };
@@ -311,12 +321,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   }
 
   private void showFriendsOnMap(List<Friends> friendsList) {
-    for (Friends friend : friendsList) {
+    for (final Friends friend : friendsList) {
       final MarkerOptions markerOptions = new MarkerOptions();
       markerOptions.title(friend.getUsername());
-      String lng = friend.getLocation().substring(0, friend.getLocation().indexOf(","));
-      String lat = friend.getLocation()
-          .substring(friend.getLocation().indexOf(",") + 1, friend.getLocation().length());
+      String[] exploded = friend.getLocation().split(",");
+
+      String lng = exploded[0];
+      String lat = exploded[1];
       final LatLng latLng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
       if (friend.getAvatar() != null) {
         final View markerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE))
@@ -330,7 +341,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markerOptions.icon(BitmapDescriptorFactory
                     .fromBitmap(createDrawableFromView(MapsActivity.this, markerView)));
                 markerOptions.position(latLng);
-                mMap.addMarker(markerOptions);
+                Marker result = mMap.addMarker(markerOptions);
+                  mFriendsMarkersHashMap.put(friend.getId(), result);
               }
             }, 0, 0, null,
             new Response.ErrorListener() {
@@ -342,9 +354,82 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         queue.add(request);
       } else {
         markerOptions.position(latLng);
-        mMap.addMarker(markerOptions);
+        Marker result = mMap.addMarker(markerOptions);
+          mFriendsMarkersHashMap.put(friend.getId(), result);
       }
+        pollFriends();
     }
+  }
+
+  public void pollFriends()
+  {
+
+      runPollFriends = true;
+      final Timer timer = new Timer();
+
+      final TimerTask task = new TimerTask() {
+          @Override
+          public void run() {
+              if(runPollFriends) {
+                  Map<String, String> params = new HashMap();
+                  params.put("location", String.valueOf(mLastLocation.getLongitude()) + "," + mLastLocation.getLatitude());
+
+                  JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST,
+                          "http://mapogram.dejan7.com/api/location/exchange", new JSONObject(params),
+                          new Response.Listener<JSONObject>() {
+                              @Override
+                              public void onResponse(JSONObject response) {
+                                  try {
+                                      JSONArray array = response.getJSONArray("friends");
+                                      List<Friends> friendsList = new ArrayList<>();
+                                      for (int i = 0; i < array.length(); i++) {
+                                          JSONObject obj = array.getJSONObject(i);
+                                          if (obj.optString("location") == "false")
+                                              continue;
+                                          Log.e("tagrrr", obj.optString("location"));
+                                          Friends friend = new Friends();
+                                          friend.setId(Integer.parseInt(obj.optString("id")));
+                                          friend.setLocation(obj.optString("location"));
+
+                                          String[] exploded = friend.getLocation().split(",");
+                                          LatLng newPost = new LatLng(Double.parseDouble(exploded[0]), Double.parseDouble(exploded[1]));
+
+
+                                          Marker test = mFriendsMarkersHashMap.get(friend.getId());
+                                          Log.e("tagrrr", test.getId());
+                                          test.setPosition(newPost);
+                                      }
+
+                                  } catch (JSONException e) {
+                                      e.printStackTrace();
+                                  }
+                              }
+                          }, new Response.ErrorListener() {
+                      @Override
+                      public void onErrorResponse(VolleyError error) {
+                          Log.e("tag", error.toString());
+                      }
+                  }) {
+                      @Override
+                      public Map<String, String> getHeaders() throws AuthFailureError {
+                          HashMap<String, String> headers = new HashMap<>();
+                          headers.put("Accept", "application/json");
+                          SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                          headers.put("Authorization", "Bearer " + settings.getString("token", null));
+                          return headers;
+                      }
+                  };
+
+                  RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                  queue.add(jsObjRequest);
+              } else {
+                  timer.cancel();
+                  timer.purge();
+              }
+          }
+      };
+
+      timer.schedule(task, 4000);
   }
 
   public Bitmap createDrawableFromView(Context context, View view) {
@@ -388,6 +473,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         intent.putExtra("latitude", mLastLocation.getLatitude());
         intent.putExtra("longitude", mLastLocation.getLongitude());
         MapsActivity.this.startActivity(intent);
+        return true;
+      }
+      case R.id.logout: {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.remove("token");
+        editor.apply();
+        Intent intent = new Intent(MapsActivity.this, LoginActivity.class);
+        startActivity(intent);
         return true;
       }
       default: {
