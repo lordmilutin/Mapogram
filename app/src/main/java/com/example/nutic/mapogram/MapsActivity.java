@@ -25,7 +25,6 @@ import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -46,6 +45,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
     ConnectionCallbacks, OnConnectionFailedListener, OnMarkerClickListener, LocationListener,
@@ -224,8 +226,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     markerOptions.title("Current Position");
     mCurrentMarker = mMap.addMarker(markerOptions);
     mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-
-    getUsers(location);
   }
 
   private void getUsers(final Location location) {
@@ -233,14 +233,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // Request a string response from the provided URL.
     String apiUrl = "http://mapogram.dejan7.com/api/location/exchange";
 
-//    HashMap<String, String> params = new HashMap<>();
-//    params.put("location",
-//        "21.892018,43.318496");
-
-    final StringRequest jsObjRequest = new StringRequest(Method.POST, apiUrl, new Response.Listener<String>() {
+    final StringRequest jsObjRequest = new StringRequest(Method.POST, apiUrl,
+        new Response.Listener<String>() {
           @Override
           public void onResponse(String response) {
-            Log.d("TAG", "onResponse: " + response);          }
+            Log.d("TAG", "onResponse: " + response);
+            try {
+              JSONObject array = new JSONObject(response);
+            } catch (JSONException e) {
+              e.printStackTrace();
+            }
+          }
         }, new ErrorListener() {
       @Override
       public void onErrorResponse(VolleyError error) {
@@ -258,10 +261,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
       @Override
       public Map<String, String> getHeaders() throws AuthFailureError {
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("Content-Type","application/json");
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        headers.put("Authorization", "Bearer " + settings.getString("token", null));
+        headers.put("Authorization", "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj" /*+ settings.getString("token", null)*/);
         return headers;
       }
     };
@@ -278,6 +281,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       case R.id.nav_add_friend: {
         Toast.makeText(this, "ADD FRIEND", Toast.LENGTH_SHORT).show();
         sendFriendRequestViaBlootooth();
+        return true;
+      }
+      case R.id.nav_show_users: {
+        getUsers(mLastLocation);
         return true;
       }
       default: {
