@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -256,7 +257,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   public void onLocationChanged(Location location) {
     mLastLocation = location;
     updateCurrentLocation(location);
-    getMarkers(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 500000);  //500km
+    getMarkers(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 5000);  //5km
   }
 
   private void updateCurrentLocation(Location location) {
@@ -274,7 +275,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final View markerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.cutom_marker, null);
     final ImageView avatar = (ImageView) markerView.findViewById(R.id.image_avatar);
     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-    ImageRequest request = new ImageRequest("http://mapogram.dejan7.com/avatars/avatar.jpg",  // TODO change url
+    String avatarURL = settings.getString("avatar", null);
+    if (avatarURL == "null")
+      avatarURL = "https://www.android.com/static/2016/img/aife/homepage/history/2010_1x.jpg";
+    ImageRequest request = new ImageRequest(avatarURL,  // TODO change url
       new Response.Listener<Bitmap>() {
         @Override
         public void onResponse(Bitmap bitmap) {
@@ -602,7 +606,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   private void getMarkers(Double latitude, Double longitude, int distance) {
 
-    String url = urlPhotos + "/" + String.valueOf(latitude) + "," + String.valueOf(longitude) + "/" + String.valueOf(distance);
+    String url = urlPhotos + "/" +  String.valueOf(longitude) + "," + String.valueOf(latitude) + "/" + String.valueOf(distance);
     clearPhotoMarkers();
 
     String categories = "/";
@@ -610,7 +614,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     for (String s : selectedCategories)
       categories += s.replace("#", "").trim() + ",";
 
-    JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url + categories, null, new Response.Listener<JSONArray>() {
+    url = url + categories.substring(0, categories.length() - 1);
+
+    Log.e("XXXX ==>>", url);
+
+    JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
       @Override
       public void onResponse(JSONArray response) {
         for (int i = 0; i < response.length(); i++) {
@@ -620,7 +628,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String location = photoJSON.getString("location");
             String[] split = location.split(",");
 
-            LatLng latLng = new LatLng(Double.valueOf(split[0]), Double.valueOf(split[1]));
+            LatLng latLng = new LatLng( Double.valueOf(split[1]), Double.valueOf(split[0]));
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(latLng);
             markerOptions.title(photoJSON.getString("description"));
@@ -708,13 +716,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Toast.makeText(getApplicationContext(), btn.getText().toString(), Toast.LENGTH_LONG).show();
   }
 
+  public void handleResetClick(View v)
+  {
+    selectedCategories.clear();
+    EditText radius = (EditText) findViewById(R.id.editText4);
+    radius.setText("5000");
 
-  public void handleResetClick(View v) {
+    ArrayList<View> allButtons;
+    allButtons = ((LinearLayout) findViewById(R.id.tagsScroll)).getTouchables();
 
+    for (View btn : allButtons)
+      btn.setBackgroundResource(android.R.drawable.btn_default);
+
+    getMarkers(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 5000);  //5km
   }
 
-  public void handleSubmitQuery(View v) {
-
+  public void handleSubmitQuery(View v)
+  {
+    EditText radius = (EditText) findViewById(R.id.editText4);
+    getMarkers(mLastLocation.getLatitude(), mLastLocation.getLongitude(), Integer.valueOf(radius.getText().toString()));
   }
 }
 
