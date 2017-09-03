@@ -271,6 +271,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     final View markerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.cutom_marker, null);
     final ImageView avatar = (ImageView) markerView.findViewById(R.id.image_avatar);
+    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
     ImageRequest request = new ImageRequest("http://mapogram.dejan7.com/avatars/avatar.jpg",  // TODO change url
       new Response.Listener<Bitmap>() {
         @Override
@@ -282,7 +283,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
           SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-          mMap.addMarker(markerOptions).setTag( new CustomMarkerTag("user",  settings.getString("username", null)) ); // TODO change ID
+          mMap.addMarker(markerOptions).setTag( new CustomMarkerTag("user",  settings.getString("username", null)) );
         }
       }, 0, 0, null,
       new Response.ErrorListener() {
@@ -396,51 +397,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
   public void pollFriends()
   {
-
       runPollFriends = true;
-      /*final Timer timer = new Timer();
-
-      final TimerTask task = new TimerTask() {
-          @Override
-          public void run() {
-
-              } else {
-                  timer.cancel();
-                  timer.purge();
-              }
-          }
-      };
-
-      timer.schedule(task, 4000);*/
-
     handler.postDelayed(runnablePollFriends, 3000);
   }
 
   private Runnable runnablePollFriends = new Runnable() {
     @Override
     public void run() {
-      /*Set<Integer> keys = mFriendsMarkersHashMap.keySet();  //get all keys
-      for(Integer i: keys)
-      {
-        //System.out.println(i);
-        if (i != null)
-          Log.e("ovoJeInt", Integer.toString(i));
-      }
-      if (runPollFriends) {
-        for (int i = 15; i<20; i++) {
-
-          Marker setMarker = mFriendsMarkersHashMap.get(16);
-          if (setMarker != null) {
-            Log.e("tagrrr", "jeste");
-
-            setMarker.setPosition(new LatLng(10, 10));
-          }
-        }
-
-
-
-        handler.postDelayed(runnablePollFriends, 3000);
-*/
         Map<String, String> params = new HashMap();
         params.put("location", String.valueOf(mLastLocation.getLongitude()) + "," + mLastLocation.getLatitude());
 

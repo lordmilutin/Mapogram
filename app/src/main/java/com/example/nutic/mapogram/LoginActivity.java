@@ -83,17 +83,24 @@ public class LoginActivity extends AppCompatActivity {
             String token = "";
             try {
               token = response.getString("token");
+              final  String usernameS = response.getString("username");
+              final String id = response.getString("id");
+              final String avatar = response.getString("avatar");
+              // Save token in preferences for long login
+              SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+              SharedPreferences.Editor editor = settings.edit();
+
+              editor.putString("token", token);
+              editor.putString("username", usernameS);
+              editor.putString("id", id);
+              editor.putString("avatar", avatar);
+
+            // Commit the edits!
+              editor.apply();
             } catch (JSONException e) {
               e.printStackTrace();
             }
 
-            // Save token in preferences for long login
-            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString("token", token);
-            editor.putString("username", username);
-            // Commit the edits!
-            editor.apply();
 
             redirectAfterLogin();
           }
