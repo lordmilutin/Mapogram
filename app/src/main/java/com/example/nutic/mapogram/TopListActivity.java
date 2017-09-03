@@ -27,6 +27,8 @@ import java.util.ArrayList;
 public class TopListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
   private String url = "http://mapogram.dejan7.com/api/users/toplist";
+  Double latitude;
+  Double longitude;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,10 @@ public class TopListActivity extends AppCompatActivity implements NavigationView
 
     NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
     navigationView.setNavigationItemSelectedListener(this);
+
+    Intent intent = getIntent();
+    latitude = intent.getDoubleExtra("latitude", 43.321349);
+    longitude = intent.getDoubleExtra("longitude", 21.895758);
 
     loadToplist();
   }
@@ -104,13 +110,17 @@ public class TopListActivity extends AppCompatActivity implements NavigationView
         return true;
       }
       case R.id.nav_add_photo: {
-        Intent alreadyLoggedInIntent = new Intent(TopListActivity.this, AddPhotoActivity.class);
-        TopListActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(TopListActivity.this, AddPhotoActivity.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        TopListActivity.this.startActivity(intent);
         return true;
       }
       case R.id.nav_top_list: {
-        Intent alreadyLoggedInIntent = new Intent(TopListActivity.this, TopListActivity.class);
-        TopListActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(TopListActivity.this, TopListActivity.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        TopListActivity.this.startActivity(intent);
         return true;
       }
       default: {

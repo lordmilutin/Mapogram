@@ -1,6 +1,7 @@
 package com.example.nutic.mapogram;
 
 import android.Manifest.permission;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -9,35 +10,42 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout.LayoutParams;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.ArrayMap;
+import android.util.DisplayMetrics;
+
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.Response.ErrorListener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.nutic.mapogram.model.Friends;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -50,13 +58,18 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.vision.text.Line;
 
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -139,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   @Override
   protected void onStop() {
     super.onStop();
-    if(mBluetoothAdapter != null) {
+    if (mBluetoothAdapter != null) {
       mBluetoothAdapter.cancelDiscovery();
     }
     if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
@@ -250,14 +263,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   private void getUsers(final Location location) {
 
     Map<String, String> params = new HashMap();
-    params.put("location", "21.892018,43.318496");
+    params.put("location", String.valueOf(location.getLongitude()) + "," + location.getLatitude());
 
-    JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, "http://mapogram.dejan7.com/api/location/exchange", new JSONObject(params), new Response.Listener<JSONObject>() {
-      @Override
-      public void onResponse(JSONObject response) {
-        Log.e("tag", response.toString());
-      }
-    }, new Response.ErrorListener() {
+    JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST,
+        "http://mapogram.dejan7.com/api/location/exchange", new JSONObject(params),
+        new Response.Listener<JSONObject>() {
+          @Override
+          public void onResponse(JSONObject response) {
+            try {
+              JSONArray array = response.getJSONArray("friends");
+              List<Friends> friendsList = new ArrayList<>();
+              for (int i = 0; i < array.length(); i++) {
+                JSONObject obj = array.getJSONObject(i);
+                Friends friend = new Friends();
+                friend.setUsername(obj.optString("username"));
+                friend.setAvatar(obj.optString("avatar"));
+                friend.setFirstName(obj.optString("first_name"));
+                friend.setLastName(obj.optString("last_name"));
+                friend.setLocation(obj.optString("location"));
+                friendsList.add(friend);
+              }
+
+              showFriendsOnMap(friendsList);
+
+            } catch (JSONException e) {
+              e.printStackTrace();
+            }
+          }
+        }, new Response.ErrorListener() {
       @Override
       public void onErrorResponse(VolleyError error) {
         Log.e("tag", error.toString());
@@ -267,20 +300,72 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
       public Map<String, String> getHeaders() throws AuthFailureError {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
-        headers.put("Authorization", "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj");
+        headers.put("Authorization",
+            "Bearer 73zWKMNjndojXGlRKOM71ROjQKeOJfXLTA1k0M07rtJtJYunq6BGDCvFizVj");
         return headers;
       }
     };
 
     RequestQueue queue = Volley.newRequestQueue(this);
     queue.add(jsObjRequest);
+  }
 
+  private void showFriendsOnMap(List<Friends> friendsList) {
+    for (Friends friend : friendsList) {
+      final MarkerOptions markerOptions = new MarkerOptions();
+      markerOptions.title(friend.getUsername());
+      String lng = friend.getLocation().substring(0, friend.getLocation().indexOf(","));
+      String lat = friend.getLocation()
+          .substring(friend.getLocation().indexOf(",") + 1, friend.getLocation().length());
+      final LatLng latLng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+      if (friend.getAvatar() != null) {
+        final View markerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+            .inflate(R.layout.cutom_marker, null);
+        final ImageView avatar = (ImageView) markerView.findViewById(R.id.image_avatar);
+        ImageRequest request = new ImageRequest(friend.getAvatar(),
+            new Response.Listener<Bitmap>() {
+              @Override
+              public void onResponse(Bitmap bitmap) {
+                avatar.setImageBitmap(bitmap);
+                markerOptions.icon(BitmapDescriptorFactory
+                    .fromBitmap(createDrawableFromView(MapsActivity.this, markerView)));
+                markerOptions.position(latLng);
+                mMap.addMarker(markerOptions);
+              }
+            }, 0, 0, null,
+            new Response.ErrorListener() {
+              public void onErrorResponse(VolleyError error) {
+
+              }
+            });
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(request);
+      } else {
+        markerOptions.position(latLng);
+        mMap.addMarker(markerOptions);
+      }
+    }
+  }
+
+  public Bitmap createDrawableFromView(Context context, View view) {
+    DisplayMetrics displayMetrics = new DisplayMetrics();
+    ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+    view.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+    view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+    view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+    view.buildDrawingCache();
+    Bitmap bitmap = Bitmap
+        .createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+    Canvas canvas = new Canvas(bitmap);
+    view.draw(canvas);
+
+    return bitmap;
   }
 
   @Override
   public boolean onNavigationItemSelected(@NonNull MenuItem item) {
     int id = item.getItemId();
-
     switch (id) {
       case R.id.nav_add_friend: {
         Toast.makeText(this, "ADD FRIEND", Toast.LENGTH_SHORT).show();
@@ -292,13 +377,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
       }
       case R.id.nav_add_photo: {
-        Intent alreadyLoggedInIntent = new Intent(MapsActivity.this, AddPhotoActivity.class);
-        MapsActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(MapsActivity.this, AddPhotoActivity.class);
+        intent.putExtra("latitude", mLastLocation.getLatitude());
+        intent.putExtra("longitude", mLastLocation.getLongitude());
+        MapsActivity.this.startActivity(intent);
         return true;
       }
       case R.id.nav_top_list: {
-        Intent alreadyLoggedInIntent = new Intent(MapsActivity.this, TopListActivity.class);
-        MapsActivity.this.startActivity(alreadyLoggedInIntent);
+        Intent intent = new Intent(MapsActivity.this, TopListActivity.class);
+        intent.putExtra("latitude", mLastLocation.getLatitude());
+        intent.putExtra("longitude", mLastLocation.getLongitude());
+        MapsActivity.this.startActivity(intent);
         return true;
       }
       default: {
