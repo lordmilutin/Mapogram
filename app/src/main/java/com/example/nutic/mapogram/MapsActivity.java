@@ -274,7 +274,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final View markerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.cutom_marker, null);
     final ImageView avatar = (ImageView) markerView.findViewById(R.id.image_avatar);
     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-    ImageRequest request = new ImageRequest("http://mapogram.dejan7.com/avatars/avatar.jpg",  // TODO change url
+    String avatarURL = settings.getString("avatar", null);
+    if (avatarURL == "null")
+      avatarURL = "https://www.android.com/static/2016/img/aife/homepage/history/2010_1x.jpg";
+    ImageRequest request = new ImageRequest(avatarURL,  // TODO change url
       new Response.Listener<Bitmap>() {
         @Override
         public void onResponse(Bitmap bitmap) {
@@ -621,7 +624,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String location = photoJSON.getString("location");
             String[] split = location.split(",");
 
-            LatLng latLng = new LatLng( Double.valueOf(split[0]), Double.valueOf(split[1]));
+            LatLng latLng = new LatLng( Double.valueOf(split[1]), Double.valueOf(split[0]));
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(latLng);
             markerOptions.title( photoJSON.getString("description") );

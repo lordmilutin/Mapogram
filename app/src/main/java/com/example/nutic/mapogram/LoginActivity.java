@@ -85,7 +85,11 @@ public class LoginActivity extends AppCompatActivity {
               token = response.getString("token");
               final  String usernameS = response.getString("username");
               final String id = response.getString("id");
-              final String avatar = response.getString("avatar");
+                final String avatar;
+                if (response.getString("avatar") == null || response.getString("avatar") == "null")
+                    avatar = "null";
+                else
+                    avatar = response.getString("avatar");
               // Save token in preferences for long login
               SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
               SharedPreferences.Editor editor = settings.edit();
